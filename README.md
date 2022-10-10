@@ -18,4 +18,4 @@ The amazing code repo for all the PROS code of 2022-2023.
 * We also toyed with artificial intelligence last year and acheived VRC's first active in-match Copilot
 
 ## Research and development branch
-* For more on the AI and our ffuture plans for the auton helper, see the research-and-development branch
+* For more on the AI and our future plans for the auton helper, see the research-and-development branch
