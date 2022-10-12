@@ -12,5 +12,5 @@ The amazing code repo for all the PROS code of 2021-2022.
 * src - our code
     * main.cpp - Currently contains our auton methods, auton code, and driver code
     * Also includes all of COPilot - python code, model files, etc.
-      *This Copilot code is more prone to changes/testing, as well as total deletions and developments
+      * This Copilot code is more prone to changes/testing, as well as total deletions and developments
 
