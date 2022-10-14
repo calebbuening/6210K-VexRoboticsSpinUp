@@ -45,15 +45,15 @@ void autonomous() {}
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-	pros::Motor left1(8);
-	pros::Motor left2(9, true);
-	pros::Motor left3(13, true);
-	pros::Motor left4(15);
+	pros::Motor left1(4, true);
+	pros::Motor left2(5);
+	pros::Motor left3(2);
+	pros::Motor left4(19, true);
 
-	pros::Motor right1(10, false);
-	pros::Motor right2(19, true);
-	pros::Motor right3(16, true);
-	pros::Motor right4(14, false);
+	pros::Motor right1(7, false);
+	pros::Motor right2(8, true);
+	pros::Motor right3(20, true);
+	pros::Motor right4(11, false);
 
 	pros::Motor_Group frontLeft ({left1, left2});
 	pros::Motor_Group backLeft ({left3, left4});
@@ -69,10 +69,10 @@ void opcontrol() {
 		if(std::fabs(rightJoy) < .1) rightJoy = 0;
 		if(std::fabs(strafeJoy) < .1) strafeJoy = 0;
 		
-		frontLeft = (leftJoy + rightJoy - strafeJoy) * 127;
-		backLeft = (leftJoy + rightJoy + strafeJoy) * 127;
-		frontRight = (leftJoy - rightJoy + strafeJoy) * 127; 
-		backRight = (leftJoy - rightJoy - strafeJoy) * 127;
+		frontLeft = (leftJoy + rightJoy + strafeJoy) * 127;
+		backLeft = (leftJoy + rightJoy - strafeJoy) * 127;
+		frontRight = (leftJoy - rightJoy - strafeJoy) * 127; 
+		backRight = (leftJoy - rightJoy + strafeJoy) * 127;
 
 		pros::delay(20);
 	}
