@@ -11,10 +11,9 @@ The amazing code repo for all the PROS code of 2022-2023.
 * include - All the files involving the two api's used to interact with the robot: pros and okapi
 * src - our code
     * main.cpp - Currently contains our driver code
-    * Also includes all of COPilot - python code, model files, etc.
 
 ### Auton helper and AI
-* To help with theoretical code, we made an auton helper. Go to https://github.com/joeycurnutt/VexRoboticsAutonHelper to see/use the code
+* To help with theoretical code, we made an auton helper. Go to [GitHub](https://github.com/joeycurnutt/VexRoboticsAutonHelper) to see/use the code
 * We also toyed with artificial intelligence last year and acheived VRC's first active in-match Copilot
 
 ## Research and development branch
