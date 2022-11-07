@@ -1,8 +1,8 @@
 #include "main.h"
 
 // Pneumatics
-pros::ADIDigitalOut piston ('A');
-pros::ADIDigitalOut piston2 ('H');
+pros::ADIDigitalOut stringRelease ('A');
+pros::ADIDigitalOut shieldRelease ('H');
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -17,15 +17,22 @@ pros::Motor right2(11, false);	// Rear Left inboard
 pros::Motor right3(4, true);	// Front Left outboard
 pros::Motor right4(2, false);	// Front Left inboard
 
-void initialize() {}
+// State variables
+int pneumaticState = 0;
+
+
+
+void initialize() {
+	// Make sure all pneumatics are in the off state
+	stringRelease.set_value(false);
+	shieldRelease.set_value(false);
+}
 
 void disabled() {}
 
 void competition_initialize() {}
 
 void autonomous(){
-
-	piston.set_value(false);
 
 	pros::delay(100);
 	int loop=0;
@@ -112,9 +119,6 @@ void autonomous(){
 //}
 
 void opcontrol() {
-	
-
-	piston.set_value(false);
 
 	while (true) {
 		// Scale joysticks down to percentages
@@ -152,13 +156,12 @@ void opcontrol() {
 		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
 		// String launchers
-    	if (master.get_digital(DIGITAL_R1)) {
-      		piston.set_value(true);
-    	}
-
-		// Shield release
-		if (master.get_digital(DIGITAL_R2)) {
-			piston2.set_value(true);
+    	if (master.get_digital_new_press(DIGITAL_R1)) {
+			switch(pneumaticState){
+				case 0: shieldRelease.set_value(true); break;
+				case 1: stringRelease.set_value(true); break;
+			}
+			pneumaticState++;
 		}
 
 		pros::delay(20);
