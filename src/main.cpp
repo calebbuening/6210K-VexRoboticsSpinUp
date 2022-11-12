@@ -22,6 +22,7 @@ double startTime = 0;
 bool fiveSecondWarningTriggered = false;
 bool shieldReleased = false;
 bool stringReleased = false;
+bool clockOverride = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -162,22 +163,40 @@ void opcontrol() {
 		right3 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
-		// Shield launcher
-		if(pros::millis() - startTime > 95000){
-			shieldReleased = true;
-			shieldRelease.set_value(true);
-		}
+		if(!clockOverride){
+			// Shield launcher
+			if(pros::millis() - startTime > 95000){
+				shieldReleased = true;
+				shieldRelease.set_value(true);
+			}
 
-		// String launchers
-		if(shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
-			stringReleased = true;
-			stringRelease.set_value(true);
-		}
+			// String launchers
+			if(shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+				stringReleased = true;
+				stringRelease.set_value(true);
+			}
 
-		// 5 second warning for endgame stuff
-		if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
-			fiveSecondWarningTriggered = true;
-			master.rumble("---");
+			// 5 second warning for endgame stuff
+			if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
+				fiveSecondWarningTriggered = true;
+				master.rumble("---");
+			}
+
+			// Clock functions override
+			if(master.get_digital_new_press(DIGITAL_B)){
+				clockOverride = true;
+				master.rumble(".");
+			}
+		}else{
+			if(master.get_digital_new_press(DIGITAL_R1)){
+				if(!shieldReleased){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
+				}else if(!stringReleased){
+					stringReleased = true;
+					stringRelease.set_value(true);
+				}
+			}
 		}
 
 		pros::delay(20);
