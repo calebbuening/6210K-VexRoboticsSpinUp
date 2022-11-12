@@ -163,7 +163,7 @@ void opcontrol() {
 		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
 		// Shield launcher
-		if(pros::millis() - startTime < 95000){
+		if(pros::millis() - startTime > 95000){
 			shieldReleased = true;
 			shieldRelease.set_value(true);
 		}
