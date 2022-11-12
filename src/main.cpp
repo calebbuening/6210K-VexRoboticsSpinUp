@@ -18,9 +18,10 @@ pros::Motor right3(4, true);	// Front Left outboard
 pros::Motor right4(2, false);	// Front Left inboard
 
 // State variables
-int pneumaticState = 0;
-
-
+double startTime = 0;
+bool fiveSecondWarningTriggered = false;
+bool shieldReleased = false;
+bool stringReleased = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -119,8 +120,14 @@ void autonomous(){
 //}
 
 void opcontrol() {
+	
+	// Start clock for measuring the driver part of the match
+	if(pros::competition::is_connected() && !pros::competition::is_autonomous() && !pros::competition::is_disabled()){
+		startTime = pros::millis();
+	}
 
 	while (true) {
+
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
 		double strafeJoy = master.get_analog(ANALOG_LEFT_X) / 127;
@@ -155,13 +162,22 @@ void opcontrol() {
 		right3 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
+		// Shield launcher
+		if(pros::millis() - startTime < 95000){
+			shieldReleased = true;
+			shieldRelease.set_value(true);
+		}
+
 		// String launchers
-    	if (master.get_digital_new_press(DIGITAL_R1)) {
-			switch(pneumaticState){
-				case 0: shieldRelease.set_value(true); break;
-				case 1: stringRelease.set_value(true); break;
-			}
-			pneumaticState++;
+		if(shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+			stringReleased = true;
+			stringRelease.set_value(true);
+		}
+
+		// 5 second warning for endgame stuff
+		if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
+			fiveSecondWarningTriggered = true;
+			master.rumble("---");
 		}
 
 		pros::delay(20);
