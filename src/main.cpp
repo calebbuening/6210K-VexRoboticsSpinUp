@@ -17,12 +17,14 @@ pros::Motor right2(11, false);	// Rear Left inboard
 pros::Motor right3(4, true);	// Front Left outboard
 pros::Motor right4(2, false);	// Front Left inboard
 
-// State variables
+// Variables
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;
 bool shieldReleased = false;
 bool stringReleased = false;
 bool clockOverride = false;
+char auton = 'N';
+bool initialized = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -32,56 +34,72 @@ void initialize() {
 
 void disabled() {}
 
-void competition_initialize() {}
-
 void autonomous(){
 
-	pros::delay(100);
-	int loop=0;
-	while(loop<4){
+	if(auton == 'E'){
+		pros::delay(100);
+		int loop=0;
+		while(loop<4){
 
-		// Rear Right
-		left1 = 50;
-		left2 = 50 ;
-		// Rear Left
-		left3 = 50 ;
-		left4 = 50 ;
-		// Front Right
-		right1 = 50 ; 
-		right2 = 50 ; 
-		// Rear Right
-		right3 = 50;
-		right4 = 50;
-		pros::delay(500);
+			// Rear Right
+			left1 = 50;
+			left2 = 50 ;
+			// Rear Left
+			left3 = 50 ;
+			left4 = 50 ;
+			// Front Right
+			right1 = 50 ; 
+			right2 = 50 ; 
+			// Rear Right
+			right3 = 50;
+			right4 = 50;
+			pros::delay(500);
+			
+			// Rear Right		
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			// Rear Right
+			left1 = -50;
+			left2 = -50 ;
+			// Rear Left
+			left3 = -50 ;
+			left4 = -50 ;
+			// Front Right
+			right1 = -50 ; 
+			right2 = -50 ; 
+			// Rear Right
+			right3 = -50;
+			right4 = -50;
+			pros::delay(300);
+
+			// Rear Right
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			loop=loop+1;
+		}
 		
-		// Rear Right		
-		left1 = 0;
-		left2 = 0 ;
-		// Rear Left
-		left3 = (0) ;
-		left4 = (0) ;
-		// Front Right
-		right1 = 0 ; 
-		right2 = 0 ; 
-		// Rear Right
-		right3 = 0;
-		right4 = 0;
-		pros::delay(500);
-
-		// Rear Right
-		left1 = -50;
-		left2 = -50 ;
-		// Rear Left
-		left3 = -50 ;
-		left4 = -50 ;
-		// Front Right
-		right1 = -50 ; 
-		right2 = -50 ; 
-		// Rear Right
-		right3 = -50;
-		right4 = -50;
-		pros::delay(300);
-
 		// Rear Right
 		left1 = 0;
 		left2 = 0 ;
@@ -94,25 +112,9 @@ void autonomous(){
 		// Rear Right
 		right3 = 0;
 		right4 = 0;
-		pros::delay(500);
 
-		loop=loop+1;
+		pros::delay(2000);
 	}
-	
-	// Rear Right
-	left1 = 0;
-	left2 = 0 ;
-	// Rear Left
-	left3 = (0) ;
-	left4 = (0) ;
-	// Front Right
-	right1 = 0 ; 
-	right2 = 0 ; 
-	// Rear Right
-	right3 = 0;
-	right4 = 0;
-
-	pros::delay(2000);
 }
 
 // This would not compile
@@ -121,6 +123,39 @@ void autonomous(){
 //}
 
 void opcontrol() {
+	if(!initialized){
+		master.clear();
+		pros::delay(60);
+		master.print(0, 0, "Select an auton:");
+		pros::delay(60);
+		bool autonSelected = false;
+		int selectionIndex = 0;
+		while(!autonSelected){
+			// Adjust which auton program we have selected
+			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
+			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
+			if(selectionIndex > 2) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 2;
+
+			// Print selected auton
+			switch(selectionIndex){
+				case 0: master.print(1, 0, "        None        "); auton = 'N'; break;
+				case 1: master.print(1, 0, "     Eli's Auton    "); auton = 'E'; break;
+				case 2: master.print(1, 0, "    Sensor Auton    "); auton = 'S'; break;
+			}
+
+			// Break when done
+			if(master.get_digital_new_press(DIGITAL_A)){
+				autonSelected = true;
+			}
+
+			// Delay to prevent the controller from ignoring commands
+			pros::delay(60);
+		}
+		master.clear();
+		initialized = true;
+	}
+
 	
 	// Start clock for measuring the driver part of the match
 	if(pros::competition::is_connected() && !pros::competition::is_autonomous() && !pros::competition::is_disabled()){
