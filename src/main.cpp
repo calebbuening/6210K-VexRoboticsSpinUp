@@ -153,6 +153,17 @@ void opcontrol() {
 			pros::delay(60);
 		}
 		master.clear();
+		pros::delay(60);
+
+		// Safety reminder
+		master.rumble("..");
+		pros::delay(60);
+		master.print(0, 0, "Remove safety, then");
+		pros::delay(60);
+		master.print(1, 0, "press A");
+		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
+		master.clear();
+
 		initialized = true;
 	}
 
