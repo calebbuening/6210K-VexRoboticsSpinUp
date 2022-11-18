@@ -14,6 +14,7 @@
 
 #define STRING 'A'
 #define SHIELD 'H'
+#define SIDES 'B'
 
 #define GYRO 7
 #define GPS_PORT 8
@@ -22,8 +23,9 @@
 #define ROLLER_VISION 9
 
 // Pneumatics
-pros::ADIDigitalOut stringRelease (STRING);
-pros::ADIDigitalOut shieldRelease (SHIELD);
+pros::ADIDigitalOut stringRelease(STRING);
+pros::ADIDigitalOut shieldRelease(SHIELD);
+pros::ADIDigitalOut sidesRelease(SIDES);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);

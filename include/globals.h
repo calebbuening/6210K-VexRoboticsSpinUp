@@ -12,6 +12,7 @@
 
 #define STRING 'A'
 #define SHIELD 'H'
+#define SIDES 'B'
 
 #define GYRO 7
 #define GPS_PORT 8
@@ -46,3 +47,4 @@ extern pros::GPS gps;
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
 extern pros::ADIDigitalOut shieldRelease;
+extern pros::ADIDigitalOut sidesRelease;

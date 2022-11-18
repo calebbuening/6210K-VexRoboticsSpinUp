@@ -2,24 +2,6 @@
 #include "auton_assist_methods.h"
 #include "globals.h"
 
-// Pneumatics
-pros::ADIDigitalOut stringRelease ('A');
-pros::ADIDigitalOut shieldRelease ('H');
-pros::ADIDigitalOut sidesRelease ('B');
-
-// Controllers
-pros::Controller master(pros::E_CONTROLLER_MASTER);
-
-// Motors
-pros::Motor left1(14, false);	// Rear Right outboard
-pros::Motor left2(13, true);	// Rear Right inboard
-pros::Motor left3(5, false);	// Front Right outboard
-pros::Motor left4(3, true);		// Front Right inboard
-pros::Motor right1(12, true);	// Rear Left outboard
-pros::Motor right2(11, false);	// Rear Left inboard
-pros::Motor right3(4, true);	// Front Left outboard
-pros::Motor right4(2, false);	// Front Left inboard
-
 // Variables
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;
