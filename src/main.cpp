@@ -1,4 +1,6 @@
 #include "main.h"
+#include "auton_assist_methods.h"
+#include "globals.h"
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease ('A');
