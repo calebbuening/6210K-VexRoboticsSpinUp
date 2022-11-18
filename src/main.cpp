@@ -3,6 +3,7 @@
 // Pneumatics
 pros::ADIDigitalOut stringRelease ('A');
 pros::ADIDigitalOut shieldRelease ('H');
+pros::ADIDigitalOut sidesRelease ('B');
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -25,6 +26,7 @@ bool stringReleased = false;
 bool clockOverride = false;
 char auton = 'N';
 bool initialized = false;
+bool sidesReleased = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -217,9 +219,15 @@ void opcontrol() {
 			}
 
 			// String launchers
-			if(shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+			if(pros::millis() - startTime > 95000 && shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
 				stringReleased = true;
 				stringRelease.set_value(true);
+			}
+
+			// Side expansion
+			if(!sidesReleased && master.get_digital_new_press(DIGITAL_LEFT)){
+				sidesReleased = true;
+				sidesRelease.set_value(true);
 			}
 
 			// 5 second warning for endgame stuff
@@ -242,6 +250,11 @@ void opcontrol() {
 					stringReleased = true;
 					stringRelease.set_value(true);
 				}
+			}
+
+			if(!sidesReleased && master.get_digital_new_press(DIGITAL_L1)){
+				sidesReleased = true;
+				sidesRelease.set_value(true);
 			}
 		}
 
