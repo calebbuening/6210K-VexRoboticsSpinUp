@@ -196,6 +196,7 @@ void turnViaIMU(double heading){
 void driveViaIMU(double dist)
 {
 	// To in. then to rev, then to square 39.3701 instead of 24 for meters
+	double pos = (left1.get_position() + right1.get_position())/2;
 	left1.move_relative(dist, 200);
 	left2.move_relative(dist, 200);
 	left3.move_relative(dist, 200);
@@ -204,7 +205,9 @@ void driveViaIMU(double dist)
 	right2.move_relative(dist, 200);
 	right3.move_relative(dist, 200);
 	right4.move_relative(dist, 200);
-	pros::delay(3000);
+	while (!((((left1.get_position() + right1.get_position())/2) < (pos + dist) + .1) && (((left1.get_position() + right1.get_position())/2) > (pos + dist) - .1))) {
+		pros::delay(1000);
+	}
 }
 
 void autonomous(){
@@ -213,16 +216,26 @@ void autonomous(){
 		eliScoreRoller();
 		driveViaIMU(-2.5);
 		turnViaIMU(90);
-		driveViaIMU(2);
+		driveViaIMU(2.25);
 		eliScoreRoller();
 		driveViaIMU(-2.5);
 		turnViaIMU(225);
-		driveViaIMU(27);
+		driveViaIMU(17.2);
+		turnViaIMU(180);
+		driveViaIMU(2.5);
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(270);
+		driveViaIMU(2.5);
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(225);
+		driveViaIMU(1.5);
 
 		// Endgame
-		// shieldRelease.set_value(true);
-		// pros::delay(1000);
-		// stringRelease.set_value(true);
+		shieldRelease.set_value(true);
+		pros::delay(1000);
+		stringRelease.set_value(true);
 	}
 
 	if(auton == 'L'){
