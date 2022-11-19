@@ -16,7 +16,7 @@
 #define SHIELD 'H'
 #define SIDES 'B'
 
-#define GYRO 7
+#define GYRO 20
 #define GPS_PORT 8
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
@@ -31,14 +31,14 @@ pros::ADIDigitalOut sidesRelease(SIDES);
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // Motors
-pros::Motor left1(LEFT_1, false);	// Rear Right outboard
-pros::Motor left2(LEFT_2, true);	// Rear Right inboard
-pros::Motor left3(LEFT_3, false);	// Front Right outboard
-pros::Motor left4(LEFT_4, true);		// Front Right inboard
-pros::Motor right1(RIGHT_1, true);	// Rear Left outboard
-pros::Motor right2(RIGHT_2, false);	// Rear Left inboard
-pros::Motor right3(RIGHT_3, true);	// Front Left outboard
-pros::Motor right4(RIGHT_4, false);	// Front Left inboard
+pros::Motor left1(LEFT_1, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right outboard
+pros::Motor left2(LEFT_2, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right inboard
+pros::Motor left3(LEFT_3, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Right outboard
+pros::Motor left4(LEFT_4, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);		// Front Right inboard
+pros::Motor right1(RIGHT_1, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left outboard
+pros::Motor right2(RIGHT_2, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left inboard
+pros::Motor right3(RIGHT_3, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left outboard
+pros::Motor right4(RIGHT_4, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left inboard
 
 // Sensors
 pros::IMU imu(GYRO);
@@ -63,10 +63,169 @@ void initialize() {
 
 void disabled() {}
 
+void eliScoreRoller(){
+	int loop=0;
+		while(loop<3){
+
+			// Rear Right
+			left1 = 50;
+			left2 = 50 ;
+			// Rear Left
+			left3 = 50 ;
+			left4 = 50 ;
+			// Front Right
+			right1 = 50 ; 
+			right2 = 50 ; 
+			// Rear Right
+			right3 = 50;
+			right4 = 50;
+			pros::delay(500);
+			
+			// Rear Right		
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			// Rear Right
+			left1 = -50;
+			left2 = -50 ;
+			// Rear Left
+			left3 = -50 ;
+			left4 = -50 ;
+			// Front Right
+			right1 = -50 ; 
+			right2 = -50 ; 
+			// Rear Right
+			right3 = -50;
+			right4 = -50;
+			pros::delay(300);
+
+			// Rear Right
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			loop=loop+1;
+		}
+		
+		// Rear Right
+		left1 = 0;
+		left2 = 0 ;
+		// Rear Left
+		left3 = (0) ;
+		left4 = (0) ;
+		// Front Right
+		right1 = 0 ; 
+		right2 = 0 ; 
+		// Rear Right
+		right3 = 0;
+		right4 = 0;
+
+		pros::delay(500);
+}
+
+// Returns -1, 0, and 1 based on number direction
+int sgn(double d) // Mimimcs the mathematical sgn function
+{
+	if(d < 0){return -1;}
+	if(d > 0){return 1;}
+	return 0;
+}
+
+void turnViaIMU(double heading){
+	double error = heading - imu.get_rotation();
+	int rotation;
+	while(std::fabs(error) > .5)
+	{
+		if(std::fabs(error) < 30){
+			rotation = -(6 * error); // Was 6
+		}else{
+			rotation = -200 * sgn(error); // was 200
+		}
+
+		left1.move_velocity(rotation);
+		left2.move_velocity(rotation);
+		left3.move_velocity(rotation);
+		left4.move_velocity(rotation);
+		right1.move_velocity(-rotation);
+		right2.move_velocity(-rotation);
+		right3.move_velocity(-rotation);
+		right4.move_velocity(-rotation);
+		error = heading - imu.get_rotation();
+		pros::delay(5);
+	}
+	rotation = 120 * sgn(error); // was 30
+	left1.move_velocity(rotation);
+	left2.move_velocity(rotation);
+	left3.move_velocity(rotation);
+	left4.move_velocity(rotation);
+	right1.move_velocity(-rotation);
+	right2.move_velocity(-rotation);
+	right3.move_velocity(-rotation);
+	right4.move_velocity(-rotation);
+	pros::delay(50);
+	left1.move_velocity(0);
+	left2.move_velocity(0);
+	left3.move_velocity(0);
+	left4.move_velocity(0);
+	right1.move_velocity(0);
+	right2.move_velocity(0);
+	right3.move_velocity(0);
+	right4.move_velocity(0);
+}
+
+// Drive guided by IMU
+void driveViaIMU(double dist)
+{
+	// To in. then to rev, then to square 39.3701 instead of 24 for meters
+	left1.move_relative(dist, 200);
+	left2.move_relative(dist, 200);
+	left3.move_relative(dist, 200);
+	left4.move_relative(dist, 200);
+	right1.move_relative(dist, 200);
+	right2.move_relative(dist, 200);
+	right3.move_relative(dist, 200);
+	right4.move_relative(dist, 200);
+	pros::delay(3000);
+}
+
 void autonomous(){
 
-	if(auton == 'E'){
-		pros::delay(100);
+	if(auton == 'A'){
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(90);
+		driveViaIMU(2);
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(225);
+		driveViaIMU(27);
+
+		// Endgame
+		// shieldRelease.set_value(true);
+		// pros::delay(1000);
+		// stringRelease.set_value(true);
+	}
+
+	if(auton == 'L'){
 		int loop=0;
 		while(loop<4){
 
@@ -144,6 +303,11 @@ void autonomous(){
 
 		pros::delay(2000);
 	}
+
+	if(auton == 'E'){
+		turnViaIMU(90);
+		driveViaIMU(2);
+	}
 }
 
 // This would not compile
@@ -163,14 +327,15 @@ void opcontrol() {
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 2) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 2;
+			if(selectionIndex > 3) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 3;
 
 			// Print selected auton
 			switch(selectionIndex){
 				case 0: master.print(1, 0, "        None        "); auton = 'N'; break;
-				case 1: master.print(1, 0, "     Eli's Auton    "); auton = 'E'; break;
-				case 2: master.print(1, 0, "    Sensor Auton    "); auton = 'S'; break;
+				case 1: master.print(1, 0, "        Auton       "); auton = 'A'; break;
+				case 2: master.print(1, 0, "    Experimental    "); auton = 'E'; break;
+				case 3: master.print(1, 0, "     Eli's Auton    "); auton = 'L'; break;
 			}
 
 			// Break when done
