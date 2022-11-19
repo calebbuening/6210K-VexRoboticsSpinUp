@@ -219,18 +219,20 @@ void autonomous(){
 		driveViaIMU(2.25);
 		eliScoreRoller();
 		driveViaIMU(-2.5);
-		turnViaIMU(225);
-		driveViaIMU(17.2);
-		turnViaIMU(180);
-		driveViaIMU(2.5);
-		eliScoreRoller();
-		driveViaIMU(-2.5);
-		turnViaIMU(270);
-		driveViaIMU(2.5);
-		eliScoreRoller();
-		driveViaIMU(-2.5);
-		turnViaIMU(225);
-		driveViaIMU(1.5);
+		// turnViaIMU(225);
+		// driveViaIMU(17.2);
+		// turnViaIMU(180);
+		// driveViaIMU(2.5);
+		// eliScoreRoller();
+		// driveViaIMU(-2.5);
+		// turnViaIMU(270);
+		// driveViaIMU(2.5);
+		// eliScoreRoller();
+		// driveViaIMU(-2.5);
+		// turnViaIMU(225);
+		// driveViaIMU(1.5);
+
+		turnViaIMU(45);
 
 		// Endgame
 		shieldRelease.set_value(true);
