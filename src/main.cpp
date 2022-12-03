@@ -210,15 +210,70 @@ void driveViaIMU(double dist)
 	}
 }
 
+void realDriveViaIMU(double dist, double heading){
+	double pos = (left1.get_position() + right1.get_position())/2;
+	dist += pos;
+	if(dist > pos){
+		while(pos < dist){
+			double error = heading - imu.get_rotation();
+			int rotation;
+			if(std::fabs(error) < 30){
+				rotation = (6 * error); // Was 6
+			}else{
+				rotation = 200 * sgn(error); // was 200
+			}
+			left1.move_velocity(200 - rotation);
+			left2.move_velocity(200 - rotation);
+			left3.move_velocity(200 - rotation);
+			left4.move_velocity(200 - rotation);
+			right1.move_velocity(200 + rotation);
+			right2.move_velocity(200 + rotation);
+			right3.move_velocity(200 + rotation);
+			right4.move_velocity(200 + rotation);
+			pos = (left1.get_position() + right1.get_position())/2;
+			pros::delay(5);
+		}
+	}else{
+		while(pos > dist){
+			double error = heading - imu.get_rotation();
+			int rotation;
+			if(std::fabs(error) < 30){
+				rotation = (6 * error); // Was 6
+			}else{
+				rotation = 200 * sgn(error); // was 200
+			}
+			left1.move_velocity(-200 - rotation);
+			left2.move_velocity(-200 - rotation);
+			left3.move_velocity(-200 - rotation);
+			left4.move_velocity(-200 - rotation);
+			right1.move_velocity(-200 + rotation);
+			right2.move_velocity(-200 + rotation);
+			right3.move_velocity(-200 + rotation);
+			right4.move_velocity(-200 + rotation);
+			pos = (left1.get_position() + right1.get_position())/2;
+			pros::delay(5);
+		}
+	}
+	left1.move_velocity(0);
+	left2.move_velocity(0);
+	left3.move_velocity(0);
+	left4.move_velocity(0);
+	right1.move_velocity(0);
+	right2.move_velocity(0);
+	right3.move_velocity(0);
+	right4.move_velocity(0);
+}
+
 void autonomous(){
 
-	if(auton == 'A'){
+	if(auton == 'S'){
 		eliScoreRoller();
 		driveViaIMU(-2.5);
 		turnViaIMU(90);
 		driveViaIMU(2.25);
 		eliScoreRoller();
 		driveViaIMU(-2.5);
+
 		// turnViaIMU(225);
 		// driveViaIMU(17.2);
 		// turnViaIMU(180);
@@ -233,6 +288,35 @@ void autonomous(){
 		// driveViaIMU(1.5);
 
 		turnViaIMU(45);
+		driveViaIMU(2);
+
+		// Endgame
+		shieldRelease.set_value(true);
+		pros::delay(1000);
+		stringRelease.set_value(true);
+	}
+
+	if(auton == 'A'){
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(90);
+		driveViaIMU(2.25);
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+
+		turnViaIMU(225);
+		realDriveViaIMU(17.3, 225); // 17.2 was what it originally was
+		turnViaIMU(180);
+		driveViaIMU(2.1); // 2.25
+
+		eliScoreRoller();
+		driveViaIMU(-2.25);
+		turnViaIMU(270);
+		realDriveViaIMU(2.25, 270);
+		eliScoreRoller();
+		driveViaIMU(-2.5);
+		turnViaIMU(225);
+		driveViaIMU(1.25);
 
 		// Endgame
 		shieldRelease.set_value(true);
@@ -284,7 +368,7 @@ void autonomous(){
 			// Rear Right
 			right3 = -50;
 			right4 = -50;
-			pros::delay(300);
+			pros::delay(150);
 
 			// Rear Right
 			left1 = 0;
@@ -320,8 +404,7 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
-		turnViaIMU(90);
-		driveViaIMU(2);
+		realDriveViaIMU(17.2, 0);
 	}
 }
 
@@ -342,15 +425,16 @@ void opcontrol() {
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 3) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 3;
+			if(selectionIndex > 4) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 4;
 
 			// Print selected auton
 			switch(selectionIndex){
 				case 0: master.print(1, 0, "        None        "); auton = 'N'; break;
-				case 1: master.print(1, 0, "        Auton       "); auton = 'A'; break;
+				case 1: master.print(1, 0, "      Full Auton    "); auton = 'A'; break;
 				case 2: master.print(1, 0, "    Experimental    "); auton = 'E'; break;
 				case 3: master.print(1, 0, "     Eli's Auton    "); auton = 'L'; break;
+				case 4: master.print(1, 0, "    Simple Auton    "); auton = 'S'; break;
 			}
 
 			// Break when done
