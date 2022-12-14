@@ -79,7 +79,7 @@ void eliScoreRoller(){
 			// Rear Right
 			right3 = 50;
 			right4 = 50;
-			pros::delay(500);
+			pros::delay(750);
 			
 			// Rear Right		
 			left1 = 0;
@@ -107,7 +107,7 @@ void eliScoreRoller(){
 			// Rear Right
 			right3 = -50;
 			right4 = -50;
-			pros::delay(300);
+			pros::delay(150);
 
 			// Rear Right
 			left1 = 0;
@@ -193,7 +193,7 @@ void turnViaIMU(double heading){
 }
 
 // Drive guided by IMU
-void driveViaIMU(double dist)
+void driveViaDist(double dist)
 {
 	// To in. then to rev, then to square 39.3701 instead of 24 for meters
 	double pos = (left1.get_position() + right1.get_position())/2;
@@ -210,15 +210,15 @@ void driveViaIMU(double dist)
 	}
 }
 
-void realDriveViaIMU(double dist, double heading){
+void driveViaIMU(double dist, double heading){
 	double pos = (left1.get_position() + right1.get_position())/2;
 	dist += pos;
 	if(dist > pos){
 		while(pos < dist){
 			double error = heading - imu.get_rotation();
 			int rotation;
-			if(std::fabs(error) < 30){
-				rotation = (6 * error); // Was 6
+			if(std::fabs(error) < 15){ // Was 30
+				rotation = (12 * error); // Was 6
 			}else{
 				rotation = 200 * sgn(error); // was 200
 			}
@@ -268,11 +268,11 @@ void autonomous(){
 
 	if(auton == 'S'){
 		eliScoreRoller();
-		driveViaIMU(-2.5);
+		driveViaDist(-2.5);
 		turnViaIMU(90);
-		driveViaIMU(2.25);
+		driveViaDist(2.25);
 		eliScoreRoller();
-		driveViaIMU(-2.5);
+		driveViaDist(-2.5);
 
 		// turnViaIMU(225);
 		// driveViaIMU(17.2);
@@ -288,7 +288,7 @@ void autonomous(){
 		// driveViaIMU(1.5);
 
 		turnViaIMU(45);
-		driveViaIMU(2);
+		driveViaDist(2);
 
 		// Endgame
 		shieldRelease.set_value(true);
@@ -297,31 +297,44 @@ void autonomous(){
 	}
 
 	if(auton == 'A'){
+		// Score the first roller
 		eliScoreRoller();
-		driveViaIMU(-2.5);
+
+		// Score the second roller
+		driveViaIMU(-2.3, 0);
 		turnViaIMU(90);
-		driveViaIMU(2.25);
+		driveViaIMU(.5, 90);
 		eliScoreRoller();
-		driveViaIMU(-2.5);
 
+		// Cross the field and turn towards the next roller
+		driveViaIMU(-2.8, 90); // -2.5
 		turnViaIMU(225);
-		realDriveViaIMU(17.3, 225); // 17.2 was what it originally was
+		driveViaIMU(17.3, 225);
 		turnViaIMU(180);
-		driveViaIMU(2.1); // 2.25
 
+		// Score the third roller
+		driveViaIMU(1.5, 180); // was 2.1
 		eliScoreRoller();
-		driveViaIMU(-2.25);
+
+		// Score the fourth roller
+		driveViaIMU(-2.5, 180); // 2.25
 		turnViaIMU(270);
-		realDriveViaIMU(2.25, 270);
+		driveViaIMU(2.25, 270);
 		eliScoreRoller();
-		driveViaIMU(-2.5);
+
+		// Turn and launch string
+		driveViaIMU(-2.5, 270);
 		turnViaIMU(225);
-		driveViaIMU(1.25);
+		driveViaIMU(1.25, 225);
 
 		// Endgame
 		shieldRelease.set_value(true);
 		pros::delay(1000);
 		stringRelease.set_value(true);
+		
+		// Get some string slack
+		driveViaIMU(1, 225);
+		driveViaIMU(.8, 225);
 	}
 
 	if(auton == 'L'){
@@ -404,7 +417,7 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
-		realDriveViaIMU(17.2, 0);
+		turnViaIMU(90);
 	}
 }
 
