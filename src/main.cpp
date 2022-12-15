@@ -307,7 +307,7 @@ void autonomous(){
 		eliScoreRoller();
 
 		// Cross the field and turn towards the next roller
-		driveViaIMU(-2.8, 90); // -2.5
+		driveViaIMU(-3.3, 90); // -2.5, -2.8
 		turnViaIMU(225);
 		driveViaIMU(17.3, 225);
 		turnViaIMU(180);
@@ -331,10 +331,12 @@ void autonomous(){
 		shieldRelease.set_value(true);
 		pros::delay(1000);
 		stringRelease.set_value(true);
+
+		pros::delay(1000);
 		
 		// Get some string slack
 		driveViaIMU(1, 225);
-		driveViaIMU(.8, 225);
+		driveViaIMU(-.5, 225);
 	}
 
 	if(auton == 'L'){
