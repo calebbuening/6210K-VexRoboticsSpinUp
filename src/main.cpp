@@ -419,7 +419,84 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
+		int loop=0;
+		driveViaIMU(3, 0);
 		turnViaIMU(90);
+		while(loop<4){
+
+			// Rear Right
+			left1 = 50;
+			left2 = 50 ;
+			// Rear Left
+			left3 = 50 ;
+			left4 = 50 ;
+			// Front Right
+			right1 = 50 ; 
+			right2 = 50 ; 
+			// Rear Right
+			right3 = 50;
+			right4 = 50;
+			pros::delay(500);
+			
+			// Rear Right		
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			// Rear Right
+			left1 = -50;
+			left2 = -50 ;
+			// Rear Left
+			left3 = -50 ;
+			left4 = -50 ;
+			// Front Right
+			right1 = -50 ; 
+			right2 = -50 ; 
+			// Rear Right
+			right3 = -50;
+			right4 = -50;
+			pros::delay(150);
+
+			// Rear Right
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			loop=loop+1;
+		}
+		
+		// Rear Right
+		left1 = 0;
+		left2 = 0 ;
+		// Rear Left
+		left3 = (0) ;
+		left4 = (0) ;
+		// Front Right
+		right1 = 0 ; 
+		right2 = 0 ; 
+		// Rear Right
+		right3 = 0;
+		right4 = 0;
+
+		pros::delay(2000);
 	}
 }
 
