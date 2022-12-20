@@ -22,7 +22,7 @@ wall_points = []
 for i in range (4):
     n = 0
     while n < 120:
-        wall_points.append((t.xcor(), t.ycor()))
+        wall_points.append(t.pos())
         t.forward(.1)
         n+=.1
     t.left(90)
@@ -60,9 +60,10 @@ def record_data():
             distance_noise = 0
         original_pos = t.pos()
         x = original_pos
-        while x not in wall_points:
+        if x not in wall_points:
             t.forward(.1)
             x = t.pos()
+            print("hi")
         sensor_x = t.xcor()
         sensor_y = t.ycor()
         t.goto(original_pos)
@@ -91,19 +92,23 @@ def on_w():
         t.forward(1)
         turtle.update()
         record_data()
+
 def on_s():
     if t.pos() not in wall_points:
         t.back(1)
         turtle.update()
         record_data()
+
 def on_a():
     t.left(1)
     turtle.update()
     record_data()
+
 def on_d():
     t.right(1)
     turtle.update()
     record_data()
+
 def go_to(x,y):
     if (x,y) not in wall_points:
         t.goto(x,y)
@@ -117,7 +122,7 @@ if MODE == "drive":
     s.listen()
 
     # Wait for user input
-    turtle.done()
+    s.mainloop()
 
 if MODE == "click":
     s.onclick(t.goto)
