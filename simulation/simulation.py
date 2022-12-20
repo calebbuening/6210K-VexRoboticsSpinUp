@@ -5,8 +5,6 @@ from csv import writer
 MODE = "drive"
 NOISE = False
 
-import turtle
-
 # Set up the turtle and screen
 t = turtle.Turtle("square", visible=True)
 turtle.tracer(0,0)
@@ -37,33 +35,41 @@ turtle.update()
 def record_data():
     csv_row = []
     t.hideturtle()
-    for i in range (4):
-        if NOISE:
+    if NOISE:
             # Set the mean and standard deviation of the noise
             mean = 0
             std = 0.1
             # Generate a random noise value
             x_noise = random.gauss(mean, std)
             y_noise = random.gauss(mean, std)
+    else:
+        x_noise = 0
+        y_noise = 0
+    gps_x = t.xcor() + x_noise - 2.75
+    gps_y = t.ycor() + y_noise - 3
+    csv_row.append(gps_x)
+    csv_row.append(gps_y)
+    for i in range (4):
+        if NOISE:
+            # Set the mean and standard deviation of the noise
+            mean = 0
+            std = 0.1
+            # Generate a random noise value
             distance_noise = random.gauss(mean, std)
         else:
-            x_noise = 0
-            y_noise = 0
             distance_noise = 0
         original_pos = t.pos()
-        gps_x = t.xcor() + x_noise
-        gps_y = t.ycor() + y_noise
-        while (t.pos()) not in wall_points:
+        x = original_pos
+        while x not in wall_points:
             t.forward(.1)
+            x = t.pos()
         sensor_x = t.xcor()
         sensor_y = t.ycor()
         t.goto(original_pos)
         #convert distance to mm
         #get distance in pixel
-        raw_distance = t.distance(sensor_x, sensor_y)
-        distance = (raw_distance/10*304.8) + distance_noise
-        csv_row.append(gps_x)
-        csv_row.append(gps_y)
+        raw_distance = t.distance((sensor_x, sensor_y))
+        distance = (raw_distance/10*304.8) + distance_noise + 3.5
         csv_row.append(distance)
         t.left(90)
     with open('C:\\Users\\mcurn\\OneDrive\\Documents\\GitHub\\6210K-VexRoboticsSpinUp\\nn_data\\data.csv', 'a') as f_object:
@@ -84,12 +90,12 @@ def on_w():
     if t.pos() not in wall_points:
         t.forward(1)
         turtle.update()
-    record_data()
+        record_data()
 def on_s():
     if t.pos() not in wall_points:
         t.back(1)
         turtle.update()
-    record_data()
+        record_data()
 def on_a():
     t.left(1)
     turtle.update()
