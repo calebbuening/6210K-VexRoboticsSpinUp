@@ -2,14 +2,14 @@ import turtle
 import random
 from csv import writer
 
-MODE = "drive"
+MODE = "auto"
 NOISE = False
 
 # Set up the turtle and screen
 t = turtle.Turtle("square", visible=True)
 turtle.tracer(0,0)
 s = turtle.Screen()
-s.screensize(1400, 1400)
+s.screensize(140, 140)
 
 # Draw the rectangle
 t.pu()
@@ -38,42 +38,41 @@ def record_data():
     if NOISE:
             # Set the mean and standard deviation of the noise
             mean = 0
-            std = 0.1
+            std = 0.01
             # Generate a random noise value
             x_noise = random.gauss(mean, std)
             y_noise = random.gauss(mean, std)
     else:
         x_noise = 0
         y_noise = 0
-    gps_x = t.xcor() + x_noise - 2.75
-    gps_y = t.ycor() + y_noise - 3
+    gps_x = (((t.xcor())/10)*0.3048) + x_noise - 0.06985
+    gps_y = (((t.ycor())/10)*0.3048) + y_noise - 0.0762
     csv_row.append(gps_x)
     csv_row.append(gps_y)
     for i in range (4):
         if NOISE:
             # Set the mean and standard deviation of the noise
             mean = 0
-            std = 0.1
+            std = 0.01
             # Generate a random noise value
             distance_noise = random.gauss(mean, std)
         else:
             distance_noise = 0
         original_pos = t.pos()
         x = original_pos
-        if x not in wall_points:
+        while abs(t.xcor()) < 60 and abs(t.ycor()) < 60:
             t.forward(.1)
             x = t.pos()
-            print("hi")
         sensor_x = t.xcor()
         sensor_y = t.ycor()
         t.goto(original_pos)
         #convert distance to mm
         #get distance in pixel
-        raw_distance = t.distance((sensor_x, sensor_y))
-        distance = (raw_distance/10*304.8) + distance_noise + 3.5
+        raw_distance = t.distance(sensor_x, sensor_y)
+        distance = ((raw_distance/10)*304.8) + distance_noise + 88.9
         csv_row.append(distance)
         t.left(90)
-    with open('C:\\Users\\mcurn\\OneDrive\\Documents\\GitHub\\6210K-VexRoboticsSpinUp\\nn_data\\data.csv', 'a') as f_object:
+    with open('C:\\Users\\mcurn\\OneDrive\\Documents\\GitHub\\6210K-VexRoboticsSpinUp\\nn_data\\data.csv', 'a', newline='') as f_object:
 
         # Pass this file object to csv.writer()
         # and get a writer object
@@ -88,13 +87,13 @@ def record_data():
     t.showturtle()
 # Set up the click event handler
 def on_w():
-    if t.pos() not in wall_points:
+    if abs(t.xcor() < 60) and abs(t.ycor() < 60):
         t.forward(1)
         turtle.update()
         record_data()
 
 def on_s():
-    if t.pos() not in wall_points:
+    if abs(t.xcor() < 60) and abs(t.ycor() < 60):
         t.back(1)
         turtle.update()
         record_data()
@@ -110,7 +109,7 @@ def on_d():
     record_data()
 
 def go_to(x,y):
-    if (x,y) not in wall_points:
+    if abs(x < 60) and abs(t.ycor() < 60):
         t.goto(x,y)
         record_data()
 
@@ -127,10 +126,15 @@ if MODE == "drive":
 if MODE == "click":
     s.onclick(t.goto)
     turtle.update()
+    s.mainloop()
 
 if MODE == "auto":
-    x = random.randrange(-120, 120, 0.1)
-    y = random.randrange(-120, 120, 0.1)
-    t.goto(x,y)
+    num = int(input("How many data points? "))
+    for i in range (num):
+        x = random.random()*random.randint(-60, 60)
+        y = random.random()*random.randint(-60, 60)
+        t.goto(x,y)
+        record_data()
     turtle.update()
-    record_data()
+    print("Data farming complete")
+    s.exitonclick()
