@@ -500,10 +500,13 @@ void autonomous(){
 	}
 }
 
-// This would not compile
-//double average(auto v){
-//	return std::accumulate(v.begin(), v.end(), 0.0) / v.length();
-//}
+double average(std::vector<pros::Motor> &v){
+	double sum = 0;
+	for(pros::Motor m : v){
+		sum += m.get_actual_velocity();
+	}
+	return sum / v.size();
+}
 
 void opcontrol() {
 	if(!initialized){
@@ -571,10 +574,10 @@ void opcontrol() {
 		if(std::fabs(strafeJoy) < .05) strafeJoy = 0;
 
 		// Drag adjustment for crappy motors
-		double actualFrontDiffPct = 0; //(average(frontLeft.get_actual_velocity()) - average(frontRight.get_actual_velocity())) / 400;
-		double frontTurnAdj = 0; //actualFrontDiffPct - rightJoy;
-		double actualBackDiffPct = 0; //(average(backLeft.get_actual_velocity()) - average(backRight.get_actual_velocity())) / 400;
-		double backTurnAdj = 0; //actualBackDiffPct - rightJoy;
+		double actualFrontDiffPct = (average(frontLeft.get_actual_velocity()) - average(frontRight.get_actual_velocity())) / 400;
+		double frontTurnAdj = actualFrontDiffPct - rightJoy;
+		double actualBackDiffPct = (average(backLeft.get_actual_velocity()) - average(backRight.get_actual_velocity())) / 400;
+		double backTurnAdj = actualBackDiffPct - rightJoy;
 		
 		// Assign speeds after scaling them back to 100 //
 
