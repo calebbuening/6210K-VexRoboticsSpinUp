@@ -13,8 +13,6 @@
 #define RIGHT_4 2
 
 #define STRING 'A'
-#define SHIELD 'H'
-#define SIDES 'B'
 
 #define GYRO 20
 #define GPS_PORT 8
@@ -24,8 +22,6 @@
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
-pros::ADIDigitalOut shieldRelease(SHIELD);
-pros::ADIDigitalOut sidesRelease(SIDES);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -48,17 +44,14 @@ pros::Vision vision(ROLLER_VISION, pros::E_VISION_ZERO_CENTER);
 // Variables
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;
-bool shieldReleased = false;
 bool stringReleased = false;
 bool clockOverride = false;
 char auton = 'N';
 bool initialized = false;
-bool sidesReleased = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
 	stringRelease.set_value(false);
-	shieldRelease.set_value(false);
 }
 
 void disabled() {}
@@ -291,8 +284,6 @@ void autonomous(){
 		driveViaDist(2);
 
 		// Endgame
-		shieldRelease.set_value(true);
-		pros::delay(1000);
 		stringRelease.set_value(true);
 	}
 
@@ -328,8 +319,6 @@ void autonomous(){
 		driveViaIMU(1.25, 225);
 
 		// Endgame
-		shieldRelease.set_value(true);
-		pros::delay(1000);
 		stringRelease.set_value(true);
 
 		pros::delay(1000);
@@ -598,22 +587,11 @@ void opcontrol() {
 		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
 		if(!clockOverride){
-			// Shield launcher
-			if(pros::millis() - startTime > 95000){
-				shieldReleased = true;
-				shieldRelease.set_value(true);
-			}
 
 			// String launchers
 			if(pros::millis() - startTime > 95000 && shieldReleased && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
 				stringReleased = true;
 				stringRelease.set_value(true);
-			}
-
-			// Side expansion
-			if(!sidesReleased && master.get_digital_new_press(DIGITAL_L1)){
-				sidesReleased = true;
-				sidesRelease.set_value(true);
 			}
 
 			// 5 second warning for endgame stuff
@@ -629,18 +607,10 @@ void opcontrol() {
 			}
 		}else{
 			if(master.get_digital_new_press(DIGITAL_R1)){
-				if(!shieldReleased){
-					shieldReleased = true;
-					shieldRelease.set_value(true);
-				}else if(!stringReleased){
+				if(!stringReleased){
 					stringReleased = true;
 					stringRelease.set_value(true);
 				}
-			}
-
-			if(!sidesReleased && master.get_digital_new_press(DIGITAL_L1)){
-				sidesReleased = true;
-				sidesRelease.set_value(true);
 			}
 		}
 
