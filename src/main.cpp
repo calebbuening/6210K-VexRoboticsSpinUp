@@ -2,15 +2,15 @@
 
 // Port definitions
 // Motors
-#define LEFT_1 10
-#define LEFT_2 9
-#define LEFT_3 7
-#define LEFT_4 8
+#define BRO 10
+#define BRI 9
+#define FRO 7
+#define FRI 8
 
-#define RIGHT_1 1
-#define RIGHT_2 2
-#define RIGHT_3 20
-#define RIGHT_4 6
+#define BLO 1
+#define BLI 2
+#define FLO 20
+#define FLI 6
 
 #define STRING 'H'
 #define CATA 'A'
@@ -28,14 +28,14 @@ pros::ADIDigitalOut catapultRelease(CATA);
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 // Motors
-pros::Motor left1(LEFT_1, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right outboard
-pros::Motor left2(LEFT_2, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right inboard
-pros::Motor left3(LEFT_3, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Right outboard
-pros::Motor left4(LEFT_4, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);		// Front Right inboard
-pros::Motor right1(RIGHT_1, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left outboard
-pros::Motor right2(RIGHT_2, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left inboard
-pros::Motor right3(RIGHT_3, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left outboard
-pros::Motor right4(RIGHT_4, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left inboard
+pros::Motor mBRO(BRO, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right outboard
+pros::Motor mBRI(BRI, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right inboard
+pros::Motor mFRO(FRO, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Right outboard
+pros::Motor mFRI(FRI, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);		// Front Right inboard
+pros::Motor mBLO(BLO, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left outboard
+pros::Motor mBLI(BLI, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left inboard
+pros::Motor mFLO(FLO, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left outboard
+pros::Motor mFLI(FLI, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left inboard
 
 // Sensors
 pros::IMU imu(GYRO);
@@ -62,76 +62,76 @@ void eliScoreRoller(){
 		while(loop<3){
 
 			// Rear Right
-			left1 = 50;
-			left2 = 50 ;
+			mBRO = 50;
+			mBRI = 50 ;
 			// Rear Left
-			left3 = 50 ;
-			left4 = 50 ;
+			mFRO = 50 ;
+			mFRI = 50 ;
 			// Front Right
-			right1 = 50 ; 
-			right2 = 50 ; 
+			mBLO = 50 ; 
+			mBLI = 50 ; 
 			// Rear Right
-			right3 = 50;
-			right4 = 50;
+			mFLO = 50;
+			mFLI = 50;
 			pros::delay(750);
 			
 			// Rear Right		
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			// Rear Right
-			left1 = -50;
-			left2 = -50 ;
+			mBRO = -50;
+			mBRI = -50 ;
 			// Rear Left
-			left3 = -50 ;
-			left4 = -50 ;
+			mFRO = -50 ;
+			mFRI = -50 ;
 			// Front Right
-			right1 = -50 ; 
-			right2 = -50 ; 
+			mBLO = -50 ; 
+			mBLI = -50 ; 
 			// Rear Right
-			right3 = -50;
-			right4 = -50;
+			mFLO = -50;
+			mFLI = -50;
 			pros::delay(150);
 
 			// Rear Right
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			loop=loop+1;
 		}
 		
 		// Rear Right
-		left1 = 0;
-		left2 = 0 ;
+		mBRO = 0;
+		mBRI = 0 ;
 		// Rear Left
-		left3 = (0) ;
-		left4 = (0) ;
+		mFRO = (0) ;
+		mFRI = (0) ;
 		// Front Right
-		right1 = 0 ; 
-		right2 = 0 ; 
+		mBLO = 0 ; 
+		mBLI = 0 ; 
 		// Rear Right
-		right3 = 0;
-		right4 = 0;
+		mFLO = 0;
+		mFLI = 0;
 
 		pros::delay(500);
 }
@@ -155,57 +155,57 @@ void turnViaIMU(double heading){
 			rotation = -200 * sgn(error); // was 200
 		}
 
-		left1.move_velocity(rotation);
-		left2.move_velocity(rotation);
-		left3.move_velocity(rotation);
-		left4.move_velocity(rotation);
-		right1.move_velocity(-rotation);
-		right2.move_velocity(-rotation);
-		right3.move_velocity(-rotation);
-		right4.move_velocity(-rotation);
+		mBRO.move_velocity(rotation);
+		mBRI.move_velocity(rotation);
+		mFRO.move_velocity(rotation);
+		mFRI.move_velocity(rotation);
+		mBLO.move_velocity(-rotation);
+		mBLI.move_velocity(-rotation);
+		mFLO.move_velocity(-rotation);
+		mFLI.move_velocity(-rotation);
 		error = heading - imu.get_rotation();
 		pros::delay(5);
 	}
 	rotation = 120 * sgn(error); // was 30
-	left1.move_velocity(rotation);
-	left2.move_velocity(rotation);
-	left3.move_velocity(rotation);
-	left4.move_velocity(rotation);
-	right1.move_velocity(-rotation);
-	right2.move_velocity(-rotation);
-	right3.move_velocity(-rotation);
-	right4.move_velocity(-rotation);
+	mBRO.move_velocity(rotation);
+	mBRI.move_velocity(rotation);
+	mFRO.move_velocity(rotation);
+	mFRI.move_velocity(rotation);
+	mBLO.move_velocity(-rotation);
+	mBLI.move_velocity(-rotation);
+	mFLO.move_velocity(-rotation);
+	mFLI.move_velocity(-rotation);
 	pros::delay(50);
-	left1.move_velocity(0);
-	left2.move_velocity(0);
-	left3.move_velocity(0);
-	left4.move_velocity(0);
-	right1.move_velocity(0);
-	right2.move_velocity(0);
-	right3.move_velocity(0);
-	right4.move_velocity(0);
+	mBRO.move_velocity(0);
+	mBRI.move_velocity(0);
+	mFRO.move_velocity(0);
+	mFRI.move_velocity(0);
+	mBLO.move_velocity(0);
+	mBLI.move_velocity(0);
+	mFLO.move_velocity(0);
+	mFLI.move_velocity(0);
 }
 
 // Drive guided by IMU
 void driveViaDist(double dist)
 {
 	// To in. then to rev, then to square 39.3701 instead of 24 for meters
-	double pos = (left1.get_position() + right1.get_position())/2;
-	left1.move_relative(dist, 200);
-	left2.move_relative(dist, 200);
-	left3.move_relative(dist, 200);
-	left4.move_relative(dist, 200);
-	right1.move_relative(dist, 200);
-	right2.move_relative(dist, 200);
-	right3.move_relative(dist, 200);
-	right4.move_relative(dist, 200);
-	while (!((((left1.get_position() + right1.get_position())/2) < (pos + dist) + .1) && (((left1.get_position() + right1.get_position())/2) > (pos + dist) - .1))) {
+	double pos = (mBRO.get_position() + mBLO.get_position())/2;
+	mBRO.move_relative(dist, 200);
+	mBRI.move_relative(dist, 200);
+	mFRO.move_relative(dist, 200);
+	mFRI.move_relative(dist, 200);
+	mBLO.move_relative(dist, 200);
+	mBLI.move_relative(dist, 200);
+	mFLO.move_relative(dist, 200);
+	mFLI.move_relative(dist, 200);
+	while (!((((mBRO.get_position() + mBLO.get_position())/2) < (pos + dist) + .1) && (((mBRO.get_position() + mBLO.get_position())/2) > (pos + dist) - .1))) {
 		pros::delay(1000);
 	}
 }
 
 void driveViaIMU(double dist, double heading){
-	double pos = (left1.get_position() + right1.get_position())/2;
+	double pos = (mBRO.get_position() + mBLO.get_position())/2;
 	dist += pos;
 	if(dist > pos){
 		while(pos < dist){
@@ -216,15 +216,15 @@ void driveViaIMU(double dist, double heading){
 			}else{
 				rotation = 200 * sgn(error); // was 200
 			}
-			left1.move_velocity(200 - rotation);
-			left2.move_velocity(200 - rotation);
-			left3.move_velocity(200 - rotation);
-			left4.move_velocity(200 - rotation);
-			right1.move_velocity(200 + rotation);
-			right2.move_velocity(200 + rotation);
-			right3.move_velocity(200 + rotation);
-			right4.move_velocity(200 + rotation);
-			pos = (left1.get_position() + right1.get_position())/2;
+			mBRO.move_velocity(200 - rotation);
+			mBRI.move_velocity(200 - rotation);
+			mFRO.move_velocity(200 - rotation);
+			mFRI.move_velocity(200 - rotation);
+			mBLO.move_velocity(200 + rotation);
+			mBLI.move_velocity(200 + rotation);
+			mFLO.move_velocity(200 + rotation);
+			mFLI.move_velocity(200 + rotation);
+			pos = (mBRO.get_position() + mBLO.get_position())/2;
 			pros::delay(5);
 		}
 	}else{
@@ -236,26 +236,26 @@ void driveViaIMU(double dist, double heading){
 			}else{
 				rotation = 200 * sgn(error); // was 200
 			}
-			left1.move_velocity(-200 - rotation);
-			left2.move_velocity(-200 - rotation);
-			left3.move_velocity(-200 - rotation);
-			left4.move_velocity(-200 - rotation);
-			right1.move_velocity(-200 + rotation);
-			right2.move_velocity(-200 + rotation);
-			right3.move_velocity(-200 + rotation);
-			right4.move_velocity(-200 + rotation);
-			pos = (left1.get_position() + right1.get_position())/2;
+			mBRO.move_velocity(-200 - rotation);
+			mBRI.move_velocity(-200 - rotation);
+			mFRO.move_velocity(-200 - rotation);
+			mFRI.move_velocity(-200 - rotation);
+			mBLO.move_velocity(-200 + rotation);
+			mBLI.move_velocity(-200 + rotation);
+			mFLO.move_velocity(-200 + rotation);
+			mFLI.move_velocity(-200 + rotation);
+			pos = (mBRO.get_position() + mBLO.get_position())/2;
 			pros::delay(5);
 		}
 	}
-	left1.move_velocity(0);
-	left2.move_velocity(0);
-	left3.move_velocity(0);
-	left4.move_velocity(0);
-	right1.move_velocity(0);
-	right2.move_velocity(0);
-	right3.move_velocity(0);
-	right4.move_velocity(0);
+	mBRO.move_velocity(0);
+	mBRI.move_velocity(0);
+	mFRO.move_velocity(0);
+	mFRI.move_velocity(0);
+	mBLO.move_velocity(0);
+	mBLI.move_velocity(0);
+	mFLO.move_velocity(0);
+	mFLI.move_velocity(0);
 }
 
 void autonomous(){
@@ -267,76 +267,76 @@ void autonomous(){
 		int loop = 0;
 		while(loop < 4){
 			// Rear Right
-			left1 = 50;
-			left2 = 50 ;
+			mBRO = 50;
+			mBRI = 50 ;
 			// Rear Left
-			left3 = 50 ;
-			left4 = 50 ;
+			mFRO = 50 ;
+			mFRI = 50 ;
 			// Front Right
-			right1 = 50 ; 
-			right2 = 50 ; 
+			mBLO = 50 ; 
+			mBLI = 50 ; 
 			// Rear Right
-			right3 = 50;
-			right4 = 50;
+			mFLO = 50;
+			mFLI = 50;
 			pros::delay(500);
 			
 			// Rear Right		
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			// Rear Right
-			left1 = -50;
-			left2 = -50 ;
+			mBRO = -50;
+			mBRI = -50 ;
 			// Rear Left
-			left3 = -50 ;
-			left4 = -50 ;
+			mFRO = -50 ;
+			mFRI = -50 ;
 			// Front Right
-			right1 = -50 ; 
-			right2 = -50 ; 
+			mBLO = -50 ; 
+			mBLI = -50 ; 
 			// Rear Right
-			right3 = -50;
-			right4 = -50;
+			mFLO = -50;
+			mFLI = -50;
 			pros::delay(150);
 
 			// Rear Right
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			loop=loop+1;
 		}
 		
 		// Rear Right
-		left1 = 0;
-		left2 = 0 ;
+		mBRO = 0;
+		mBRI = 0 ;
 		// Rear Left
-		left3 = (0) ;
-		left4 = (0) ;
+		mFRO = (0) ;
+		mFRI = (0) ;
 		// Front Right
-		right1 = 0 ; 
-		right2 = 0 ; 
+		mBLO = 0 ; 
+		mBLI = 0 ; 
 		// Rear Right
-		right3 = 0;
-		right4 = 0;
+		mFLO = 0;
+		mFLI = 0;
 		
 		// Turn 45 degrees
 		//int shift = auton=='S' ? 1 : -1;
@@ -404,76 +404,76 @@ void autonomous(){
 		while(loop<4){
 
 			// Rear Right
-			left1 = 50;
-			left2 = 50 ;
+			mBRO = 50;
+			mBRI = 50 ;
 			// Rear Left
-			left3 = 50 ;
-			left4 = 50 ;
+			mFRO = 50 ;
+			mFRI = 50 ;
 			// Front Right
-			right1 = 50 ; 
-			right2 = 50 ; 
+			mBLO = 50 ; 
+			mBLI = 50 ; 
 			// Rear Right
-			right3 = 50;
-			right4 = 50;
+			mFLO = 50;
+			mFLI = 50;
 			pros::delay(500);
 			
 			// Rear Right		
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			// Rear Right
-			left1 = -50;
-			left2 = -50 ;
+			mBRO = -50;
+			mBRI = -50 ;
 			// Rear Left
-			left3 = -50 ;
-			left4 = -50 ;
+			mFRO = -50 ;
+			mFRI = -50 ;
 			// Front Right
-			right1 = -50 ; 
-			right2 = -50 ; 
+			mBLO = -50 ; 
+			mBLI = -50 ; 
 			// Rear Right
-			right3 = -50;
-			right4 = -50;
+			mFLO = -50;
+			mFLI = -50;
 			pros::delay(150);
 
 			// Rear Right
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			loop=loop+1;
 		}
 		
 		// Rear Right
-		left1 = 0;
-		left2 = 0 ;
+		mBRO = 0;
+		mBRI = 0 ;
 		// Rear Left
-		left3 = (0) ;
-		left4 = (0) ;
+		mFRO = (0) ;
+		mFRI = (0) ;
 		// Front Right
-		right1 = 0 ; 
-		right2 = 0 ; 
+		mBLO = 0 ; 
+		mBLI = 0 ; 
 		// Rear Right
-		right3 = 0;
-		right4 = 0;
+		mFLO = 0;
+		mFLI = 0;
 
 		pros::delay(2000);
 	}
@@ -485,76 +485,76 @@ void autonomous(){
 		while(loop<4){
 
 			// Rear Right
-			left1 = 50;
-			left2 = 50 ;
+			mBRO = 50;
+			mBRI = 50 ;
 			// Rear Left
-			left3 = 50 ;
-			left4 = 50 ;
+			mFRO = 50 ;
+			mFRI = 50 ;
 			// Front Right
-			right1 = 50 ; 
-			right2 = 50 ; 
+			mBLO = 50 ; 
+			mBLI = 50 ; 
 			// Rear Right
-			right3 = 50;
-			right4 = 50;
+			mFLO = 50;
+			mFLI = 50;
 			pros::delay(500);
 			
 			// Rear Right		
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			// Rear Right
-			left1 = -50;
-			left2 = -50 ;
+			mBRO = -50;
+			mBRI = -50 ;
 			// Rear Left
-			left3 = -50 ;
-			left4 = -50 ;
+			mFRO = -50 ;
+			mFRI = -50 ;
 			// Front Right
-			right1 = -50 ; 
-			right2 = -50 ; 
+			mBLO = -50 ; 
+			mBLI = -50 ; 
 			// Rear Right
-			right3 = -50;
-			right4 = -50;
+			mFLO = -50;
+			mFLI = -50;
 			pros::delay(150);
 
 			// Rear Right
-			left1 = 0;
-			left2 = 0 ;
+			mBRO = 0;
+			mBRI = 0 ;
 			// Rear Left
-			left3 = (0) ;
-			left4 = (0) ;
+			mFRO = (0) ;
+			mFRI = (0) ;
 			// Front Right
-			right1 = 0 ; 
-			right2 = 0 ; 
+			mBLO = 0 ; 
+			mBLI = 0 ; 
 			// Rear Right
-			right3 = 0;
-			right4 = 0;
+			mFLO = 0;
+			mFLI = 0;
 			pros::delay(500);
 
 			loop=loop+1;
 		}
 		
 		// Rear Right
-		left1 = 0;
-		left2 = 0 ;
+		mBRO = 0;
+		mBRI = 0 ;
 		// Rear Left
-		left3 = (0) ;
-		left4 = (0) ;
+		mFRO = (0) ;
+		mFRI = (0) ;
 		// Front Right
-		right1 = 0 ; 
-		right2 = 0 ; 
+		mBLO = 0 ; 
+		mBLI = 0 ; 
 		// Rear Right
-		right3 = 0;
-		right4 = 0;
+		mFLO = 0;
+		mFLI = 0;
 
 		pros::delay(2000);
 	}
@@ -643,20 +643,20 @@ void opcontrol() {
 		// Assign speeds after scaling them back to 100 //
 
 		// Front Left
-		left1 = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
-		left2 = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
+		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
+		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
 
 		// Rear Left
-		left3 = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
-		left4 = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
+		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
+		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
 
 		// Front Right
-		right1 = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
-		right2 = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
+		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
+		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
 
 		// Rear Right
-		right3 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
-		right4 = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
+		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
+		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
 
 		if(!clockOverride){
 
