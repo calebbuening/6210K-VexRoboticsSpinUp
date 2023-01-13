@@ -2,26 +2,27 @@
 
 // Port definitions
 // Motors
-#define LEFT_1 14
-#define LEFT_2 13
-#define LEFT_3 5
-#define LEFT_4 3
+#define LEFT_1 10
+#define LEFT_2 9
+#define LEFT_3 7
+#define LEFT_4 8
 
-#define RIGHT_1 12
-#define RIGHT_2 11
-#define RIGHT_3 4
-#define RIGHT_4 2
+#define RIGHT_1 1
+#define RIGHT_2 2
+#define RIGHT_3 20
+#define RIGHT_4 6
 
-#define STRING 'A'
+#define STRING 'H'
+#define CATA 'A'
 
-#define GYRO 20
-#define GPS_PORT 8
+#define GYRO 16
+#define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
-#define ROLLER_VISION 9
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
+pros::ADIDigitalOut catapultRelease(CATA);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -39,7 +40,6 @@ pros::Motor right4(RIGHT_4, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCOD
 // Sensors
 pros::IMU imu(GYRO);
 pros::GPS gps(GPS_PORT, GPS_OFFSET_X, GPS_OFFSET_Y);
-pros::Vision vision(ROLLER_VISION, pros::E_VISION_ZERO_CENTER);
 
 // Variables
 double startTime = 0;
@@ -52,6 +52,7 @@ bool initialized = false;
 void initialize() {
 	// Make sure all pneumatics are in the off state
 	stringRelease.set_value(false);
+	catapultRelease.set_value(true);
 }
 
 void disabled() {}
@@ -259,33 +260,103 @@ void driveViaIMU(double dist, double heading){
 
 void autonomous(){
 
-	if(auton == 'S'){
-		eliScoreRoller();
-		driveViaDist(-2.5);
-		turnViaIMU(90);
-		driveViaDist(2.25);
-		eliScoreRoller();
-		driveViaDist(-2.5);
+	// THE LEAGUE AUTON
+	if(auton == 'S' || auton == 'Z'){
+		// Score the first roller
 
-		// turnViaIMU(225);
-		// driveViaIMU(17.2);
-		// turnViaIMU(180);
-		// driveViaIMU(2.5);
-		// eliScoreRoller();
-		// driveViaIMU(-2.5);
-		// turnViaIMU(270);
-		// driveViaIMU(2.5);
-		// eliScoreRoller();
-		// driveViaIMU(-2.5);
-		// turnViaIMU(225);
-		// driveViaIMU(1.5);
+		int loop = 0;
+		while(loop < 4){
+			// Rear Right
+			left1 = 50;
+			left2 = 50 ;
+			// Rear Left
+			left3 = 50 ;
+			left4 = 50 ;
+			// Front Right
+			right1 = 50 ; 
+			right2 = 50 ; 
+			// Rear Right
+			right3 = 50;
+			right4 = 50;
+			pros::delay(500);
+			
+			// Rear Right		
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
 
+			// Rear Right
+			left1 = -50;
+			left2 = -50 ;
+			// Rear Left
+			left3 = -50 ;
+			left4 = -50 ;
+			// Front Right
+			right1 = -50 ; 
+			right2 = -50 ; 
+			// Rear Right
+			right3 = -50;
+			right4 = -50;
+			pros::delay(150);
+
+			// Rear Right
+			left1 = 0;
+			left2 = 0 ;
+			// Rear Left
+			left3 = (0) ;
+			left4 = (0) ;
+			// Front Right
+			right1 = 0 ; 
+			right2 = 0 ; 
+			// Rear Right
+			right3 = 0;
+			right4 = 0;
+			pros::delay(500);
+
+			loop=loop+1;
+		}
+		
+		// Rear Right
+		left1 = 0;
+		left2 = 0 ;
+		// Rear Left
+		left3 = (0) ;
+		left4 = (0) ;
+		// Front Right
+		right1 = 0 ; 
+		right2 = 0 ; 
+		// Rear Right
+		right3 = 0;
+		right4 = 0;
+		
+		// Turn 45 degrees
+		//int shift = auton=='S' ? 1 : -1;
 		turnViaIMU(45);
-		driveViaDist(2);
 
-		// Endgame
-		stringRelease.set_value(true);
-	}
+		// Back up 8 feet
+		driveViaIMU(-8, 45);
+
+		// Turn towards the goal
+		turnViaIMU(135);
+
+		// Adjust where we are by GPS
+		
+		// Check angle one last time
+		// turnViaIMU(135);
+		
+
+		// Fire the catapult
+		catapultRelease.set_value(true);
+	}	
 
 	if(auton == 'A'){
 		// Score the first roller
@@ -407,7 +478,7 @@ void autonomous(){
 		pros::delay(2000);
 	}
 
-	if(auton == 'E'){
+	if(auton == 'R'){
 		int loop=0;
 		driveViaIMU(3, 0);
 		turnViaIMU(90);
@@ -509,16 +580,17 @@ void opcontrol() {
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 4) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 4;
+			if(selectionIndex > 5) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 5;
 
 			// Print selected auton
 			switch(selectionIndex){
 				case 0: master.print(1, 0, "        None        "); auton = 'N'; break;
-				case 1: master.print(1, 0, "      Full Auton    "); auton = 'A'; break;
-				case 2: master.print(1, 0, "    Experimental    "); auton = 'E'; break;
-				case 3: master.print(1, 0, "     Eli's Auton    "); auton = 'L'; break;
-				case 4: master.print(1, 0, "    Simple Auton    "); auton = 'S'; break;
+				case 1: master.print(1, 0, "     Full Auton     "); auton = 'A'; break;
+				case 2: master.print(1, 0, "  Right Side Auton  "); auton = 'R'; break;
+				case 3: master.print(1, 0, "   Left Side Auton  "); auton = 'L'; break;
+				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
+				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
 			}
 
 			// Break when done
