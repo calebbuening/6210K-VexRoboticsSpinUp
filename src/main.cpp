@@ -575,7 +575,7 @@ void opcontrol() {
 		pros::delay(60);
 		master.print(1, 0, "pneumatics are ready");
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
-		catapultRelease.set_value(1);
+		catapultRelease.set_value(false);
 		master.clear();
 		pros::delay(60);
 		master.print(0, 0, "Select an auton:");
