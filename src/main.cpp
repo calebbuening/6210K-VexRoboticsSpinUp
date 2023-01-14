@@ -205,7 +205,9 @@ void driveViaDist(double dist)
 }
 
 void driveViaIMU(double dist, double heading){
-	double pos = (mBRO.get_position() + mBLO.get_position())/2;
+	mBRI.tare_position();
+	mBLI.tare_position();
+	double pos = (mBRI.get_position() + mBLI.get_position())/2;
 	dist += pos;
 	if(dist > pos){
 		while(pos < dist){
@@ -224,7 +226,7 @@ void driveViaIMU(double dist, double heading){
 			mBLI.move_velocity(200 + rotation);
 			mFLO.move_velocity(200 + rotation);
 			mFLI.move_velocity(200 + rotation);
-			pos = (mBRO.get_position() + mBLO.get_position())/2;
+			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
 	}else{
@@ -244,7 +246,7 @@ void driveViaIMU(double dist, double heading){
 			mBLI.move_velocity(-200 + rotation);
 			mFLO.move_velocity(-200 + rotation);
 			mFLI.move_velocity(-200 + rotation);
-			pos = (mBRO.get_position() + mBLO.get_position())/2;
+			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
 	}
@@ -339,14 +341,13 @@ void autonomous(){
 		mFLI = 0;
 		
 		// Turn 45 degrees
-		//int shift = auton=='S' ? 1 : -1;
 		turnViaIMU(45);
 
 		// Back up 8 feet
-		driveViaIMU(-8, 45);
+		driveViaIMU(-7.4, 45);
 
 		// Turn towards the goal
-		turnViaIMU(135);
+		turnViaIMU(142.5);
 
 		// Adjust where we are by GPS
 		
@@ -570,6 +571,10 @@ double average(std::vector<pros::Motor> &v){
 
 void opcontrol() {
 	if(!initialized){
+		master.print(0, 0, "Press A once");
+		pros::delay(60);
+		master.print(1, 0, "pneumatics are ready");
+		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		master.clear();
 		pros::delay(60);
 		master.print(0, 0, "Select an auton:");
@@ -601,16 +606,6 @@ void opcontrol() {
 			// Delay to prevent the controller from ignoring commands
 			pros::delay(60);
 		}
-		master.clear();
-		pros::delay(60);
-
-		// Safety reminder
-		master.rumble("..");
-		pros::delay(60);
-		master.print(0, 0, "Remove safety, then");
-		pros::delay(60);
-		master.print(1, 0, "press A");
-		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		master.clear();
 
 		initialized = true;
