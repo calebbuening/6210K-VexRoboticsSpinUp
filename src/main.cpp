@@ -265,6 +265,13 @@ void autonomous(){
 	// THE LEAGUE AUTON
 	if(auton == 'S' || auton == 'Z'){
 		// Score the first roller
+		int autonAdjust = 1;
+		if(auton=='Z'){
+			autonAdjust = -1;
+			driveViaIMU(3, 0);
+			turnViaIMU(90);
+		}
+		imu.reset();
 
 		int loop = 0;
 		while(loop < 4){
@@ -280,7 +287,7 @@ void autonomous(){
 			// Rear Right
 			mFLO = 50;
 			mFLI = 50;
-			pros::delay(500);
+			pros::delay(400);
 			
 			// Rear Right		
 			mBRO = 0;
@@ -294,7 +301,7 @@ void autonomous(){
 			// Rear Right
 			mFLO = 0;
 			mFLI = 0;
-			pros::delay(500);
+			pros::delay(400);
 
 			// Rear Right
 			mBRO = -50;
@@ -322,7 +329,7 @@ void autonomous(){
 			// Rear Right
 			mFLO = 0;
 			mFLI = 0;
-			pros::delay(500);
+			pros::delay(400);
 
 			loop=loop+1;
 		}
@@ -341,13 +348,13 @@ void autonomous(){
 		mFLI = 0;
 		
 		// Turn 45 degrees
-		turnViaIMU(45);
+		turnViaIMU(45 * autonAdjust);
 
 		// Back up 8 feet
-		driveViaIMU(-7.4, 45);
+		driveViaIMU(-7.4, 45 * autonAdjust);
 
 		// Turn towards the goal
-		turnViaIMU(142.5);
+		turnViaIMU(144.5 * autonAdjust); // was 142.5
 
 		// Adjust where we are by GPS
 		
@@ -619,6 +626,8 @@ void opcontrol() {
 	}
 
 	while (true) {
+
+		if(master.get_digital_new_press(DIGITAL_A)) catapultRelease.set_value(true);
 
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
