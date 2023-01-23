@@ -48,6 +48,7 @@ bool stringReleased = false;
 bool clockOverride = false;
 char auton = 'N';
 bool initialized = false;
+bool catapultState = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -271,7 +272,7 @@ void autonomous(){
 			driveViaIMU(3, 0);
 			turnViaIMU(90);
 		}
-		imu.reset();
+		imu.tare();
 
 		int loop = 0;
 		while(loop < 4){
@@ -354,13 +355,10 @@ void autonomous(){
 		driveViaIMU(-7.4, 45 * autonAdjust);
 
 		// Turn towards the goal
-		turnViaIMU(144.5 * autonAdjust); // was 142.5
-
-		// Adjust where we are by GPS
+		turnViaIMU(142 * autonAdjust); // was 141.5
 		
-		// Check angle one last time
-		// turnViaIMU(135);
-		
+		// Delay to make sure the discs are at rest
+		pros::delay(1000);
 
 		// Fire the catapult
 		catapultRelease.set_value(true);
@@ -578,6 +576,16 @@ double average(std::vector<pros::Motor> &v){
 
 void opcontrol() {
 	if(!initialized){
+		
+		// Calibrate the IMU
+		master.print(0, 0, "Calibrating IMU...");
+		pros::delay(60);
+		imu.tare();
+		imu.reset();
+		while(imu.is_calibrating()) pros::delay(60);
+		master.clear();
+		pros::delay(60);
+
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
 		master.print(1, 0, "pneumatics are ready");
@@ -627,7 +635,10 @@ void opcontrol() {
 
 	while (true) {
 
-		if(master.get_digital_new_press(DIGITAL_A)) catapultRelease.set_value(true);
+		if(master.get_digital_new_press(DIGITAL_A)){
+			catapultState = !catapultState;
+			catapultRelease.set_value(catapultState);
+		}
 
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
@@ -647,21 +658,25 @@ void opcontrol() {
 		
 		// Assign speeds after scaling them back to 100 //
 
+		double speedMultiplier = 1;
+
+		if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
+
 		// Front Left
-		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
-		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127;
+		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
+		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
 
 		// Rear Left
-		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
-		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127;
+		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127 * speedMultiplier;
+		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier;
 
 		// Front Right
-		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
-		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127; 
+		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier;
+		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier;
 
 		// Rear Right
-		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
-		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127;
+		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
+		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
 
 		if(!clockOverride){
 
