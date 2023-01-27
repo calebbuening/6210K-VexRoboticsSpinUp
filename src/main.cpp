@@ -14,6 +14,7 @@
 
 #define STRING 'H'
 #define CATA 'A'
+#define SHIELD 'G'
 
 #define GYRO 16
 #define GPS_PORT 11
@@ -23,6 +24,7 @@
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
+pros::ADIDigitalOut shieldRelease(SHIELD);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -49,11 +51,13 @@ bool clockOverride = false;
 char auton = 'N';
 bool initialized = false;
 bool catapultState = false;
+bool shieldReleased = false;
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
 	stringRelease.set_value(false);
 	catapultRelease.set_value(true);
+ 	shieldRelease.set_value(false);
 }
 
 void disabled() {}
@@ -275,7 +279,7 @@ void autonomous(){
 		imu.tare();
 
 		int loop = 0;
-		while(loop < 4){
+		while(loop < 2){
 			// Rear Right
 			mBRO = 50;
 			mBRI = 50 ;
@@ -407,7 +411,7 @@ void autonomous(){
 
 	if(auton == 'L'){
 		int loop=0;
-		while(loop<4){
+		while(loop<2){
 
 			// Rear Right
 			mBRO = 50;
@@ -488,7 +492,7 @@ void autonomous(){
 		int loop=0;
 		driveViaIMU(3, 0);
 		turnViaIMU(90);
-		while(loop<4){
+		while(loop<2){
 
 			// Rear Right
 			mBRO = 50;
@@ -617,6 +621,8 @@ void opcontrol() {
 			// Break when done
 			if(master.get_digital_new_press(DIGITAL_A)){
 				autonSelected = true;
+			}else if(master.get_digital_new_press(DIGITAL_X)){
+				autonomous();
 			}
 
 			// Delay to prevent the controller from ignoring commands
@@ -686,6 +692,12 @@ void opcontrol() {
 				stringRelease.set_value(true);
 			}
 
+			// // Shield launcher
+			// if(pros::millis() - startTime > 95000){
+			// 	shieldReleased = true;
+			// 	shieldRelease.set_value(true);
+			// }
+
 			// 5 second warning for endgame stuff
 			if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
 				fiveSecondWarningTriggered = true;
@@ -703,6 +715,10 @@ void opcontrol() {
 					stringReleased = true;
 					stringRelease.set_value(true);
 				}
+			}
+			if(!shieldReleased && master.get_digital_new_press(DIGITAL_UP)){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
 			}
 		}
 
