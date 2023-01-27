@@ -692,6 +692,12 @@ void opcontrol() {
 				stringRelease.set_value(true);
 			}
 
+			// Auto string launchers
+			if(pros::millis() - startTime > 104000 && !stringReleased){
+				stringReleased = true;
+				stringRelease.set_value(true);
+			}
+
 			// // Shield launcher
 			// if(pros::millis() - startTime > 95000){
 			// 	shieldReleased = true;
@@ -710,12 +716,15 @@ void opcontrol() {
 				master.rumble(".");
 			}
 		}else{
+			// Manual string launcher
 			if(master.get_digital_new_press(DIGITAL_R1)){
 				if(!stringReleased){
 					stringReleased = true;
 					stringRelease.set_value(true);
 				}
 			}
+
+			// Manual shield launcher
 			if(!shieldReleased && master.get_digital_new_press(DIGITAL_UP)){
 					shieldReleased = true;
 					shieldRelease.set_value(true);
