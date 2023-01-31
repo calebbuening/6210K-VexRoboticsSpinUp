@@ -4,6 +4,16 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
+// Variables
+extern double startTime;
+extern bool fiveSecondWarningTriggered;
+extern bool stringReleased;
+extern bool clockOverride;
+extern char auton;
+extern bool initialized;
+extern bool catapultState;
+extern bool shieldReleased;
+
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
 extern pros::ADIDigitalOut catapultRelease;

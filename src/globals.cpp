@@ -21,6 +21,15 @@
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
 
+extern double startTime = 0;
+extern bool fiveSecondWarningTriggered = false;
+extern bool stringReleased = false;
+extern bool clockOverride = false;
+extern char auton = 'N';
+extern bool initialized = false;
+extern bool catapultState = false;
+extern bool shieldReleased = false;
+
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
