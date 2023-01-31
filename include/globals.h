@@ -13,6 +13,8 @@ extern char auton;
 extern bool initialized;
 extern bool catapultState;
 extern bool shieldReleased;
+extern bool stringLauncherAuto;
+extern bool shieldLauncherAuto;
 
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
@@ -21,6 +23,7 @@ extern pros::ADIDigitalOut shieldRelease;
 
 // Controllers
 extern pros::Controller master;
+extern pros::Controller partner;
 
 // Motors
 extern pros::Motor mBRO;

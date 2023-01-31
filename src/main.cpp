@@ -27,7 +27,7 @@ void opcontrol() {
 		pros::delay(60);
 		imu.tare();
 		imu.reset();
-		while(imu.is_calibrating()) pros::delay(60);
+		//while(imu.is_calibrating()) pros::delay(60);
 		master.clear();
 		pros::delay(60);
 
@@ -80,6 +80,7 @@ void opcontrol() {
 		startTime = pros::millis();
 	}
 
+	int loopCounter = 0;
 	while (true) {
 
 		if(master.get_digital_new_press(DIGITAL_A)){
@@ -125,6 +126,33 @@ void opcontrol() {
 		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
 		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
 
+		// Second controller code (runs every 3 loops to prevent controller rendering errors
+		// . means normal - means somethin is up
+		if(partner.get_digital_new_press(DIGITAL_L1)){
+			shieldLauncherAuto = !shieldLauncherAuto;
+		}
+		if(partner.get_digital_new_press(DIGITAL_L2)){
+			stringLauncherAuto = !stringLauncherAuto;
+		}
+		if(partner.get_digital_new_press(DIGITAL_R1)){
+			clockOverride = !clockOverride;
+		}
+		
+		
+		if(loopCounter % 9 == 0){
+			// Print line 1
+			partner.print(0, 0, "Shld: %d  Ovrd: %d", shieldLauncherAuto, clockOverride);
+		}
+		if(loopCounter % 9 == 3){
+			// Print line 2
+			partner.print(1, 0, "Str: %d", stringLauncherAuto);
+		}
+		if(loopCounter % 9 == 6){
+			// Print line 3
+			partner.print(2, 0, "Clock: %i  ", (int)(105 - ((pros::millis() - startTime)/1000)));
+		}
+		
+
 		if(!clockOverride){
 
 			// String launchers
@@ -134,16 +162,22 @@ void opcontrol() {
 			}
 
 			// Auto string launchers
-			if(pros::millis() - startTime > 104000 && !stringReleased){
+			if(stringLauncherAuto && pros::millis() - startTime > 104000 && !stringReleased){
 				stringReleased = true;
 				stringRelease.set_value(true);
 			}
 
-			// // Shield launcher
-			// if(pros::millis() - startTime > 95000){
-			// 	shieldReleased = true;
-			// 	shieldRelease.set_value(true);
-			// }
+			// Auto shield launcher
+			if(shieldLauncherAuto && !shieldReleased && pros::millis() - startTime > 95000){
+				shieldReleased = true;
+				shieldRelease.set_value(true);
+			}
+			
+			// Manual shield launcher
+			if(master.get_digital_new_press(DIGITAL_UP) && !shieldReleased && pros::millis() - startTime > 95000){
+				shieldReleased = true;
+				shieldRelease.set_value(true);
+			}
 
 			// 5 second warning for endgame stuff
 			if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
@@ -154,15 +188,13 @@ void opcontrol() {
 			// Clock functions override
 			if(master.get_digital_new_press(DIGITAL_B)){
 				clockOverride = true;
-				master.rumble(".");
+				master.rumble("-");
 			}
 		}else{
 			// Manual string launcher
-			if(master.get_digital_new_press(DIGITAL_R1)){
-				if(!stringReleased){
-					stringReleased = true;
-					stringRelease.set_value(true);
-				}
+			if(!stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+				stringReleased = true;
+				stringRelease.set_value(true);
 			}
 
 			// Manual shield launcher
@@ -171,6 +203,8 @@ void opcontrol() {
 					shieldRelease.set_value(true);
 			}
 		}
+
+		loopCounter++;
 
 		pros::delay(20);
 	}

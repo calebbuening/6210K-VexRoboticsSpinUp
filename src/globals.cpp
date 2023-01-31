@@ -21,14 +21,16 @@
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
 
-extern double startTime = 0;
-extern bool fiveSecondWarningTriggered = false;
-extern bool stringReleased = false;
-extern bool clockOverride = false;
-extern char auton = 'N';
-extern bool initialized = false;
-extern bool catapultState = false;
-extern bool shieldReleased = false;
+double startTime = 0;
+bool fiveSecondWarningTriggered = false;
+bool stringReleased = false;
+bool clockOverride = false;
+char auton = 'N';
+bool initialized = false;
+bool catapultState = false;
+bool shieldReleased = false;
+bool stringLauncherAuto = true;
+bool shieldLauncherAuto = true;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
@@ -37,6 +39,7 @@ pros::ADIDigitalOut shieldRelease(SHIELD);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
+pros::Controller partner(pros::E_CONTROLLER_PARTNER);
 
 // Motors
 pros::Motor mBRO(BRO, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Right outboard
