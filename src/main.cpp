@@ -81,6 +81,11 @@ void opcontrol() {
 	}
 
 	int loopCounter = 0;
+	bool masterDot;
+	bool masterDash;
+	bool partnerDot;
+	bool partnerDash;
+
 	while (true) {
 
 		if(master.get_digital_new_press(DIGITAL_A)){
@@ -130,26 +135,39 @@ void opcontrol() {
 		// . means normal - means somethin is up
 		if(partner.get_digital_new_press(DIGITAL_L1)){
 			shieldLauncherAuto = !shieldLauncherAuto;
+			if(shieldLauncherAuto) partnerDot = true, masterDot = true;
+			else partnerDash = true, masterDash = true;
 		}
 		if(partner.get_digital_new_press(DIGITAL_L2)){
 			stringLauncherAuto = !stringLauncherAuto;
+			if(stringLauncherAuto) partnerDot = true, masterDot = true;
+			else partnerDash = true, masterDash = true;
 		}
 		if(partner.get_digital_new_press(DIGITAL_R1)){
 			clockOverride = !clockOverride;
+			if(!clockOverride) partnerDot = true, masterDot = true;
+			else partnerDash = true, masterDash = true;
 		}
 		
-		
-		if(loopCounter % 9 == 0){
+		// Timing delays to avoid controller communication errors
+		if(loopCounter % 12 == 0){
 			// Print line 1
 			partner.print(0, 0, "Shld: %d  Ovrd: %d", shieldLauncherAuto, clockOverride);
 		}
-		if(loopCounter % 9 == 3){
+		if(loopCounter % 12 == 3){
 			// Print line 2
 			partner.print(1, 0, "Str: %d", stringLauncherAuto);
 		}
-		if(loopCounter % 9 == 6){
+		if(loopCounter % 12 == 6){
 			// Print line 3
 			partner.print(2, 0, "Clock: %i  ", (int)(105 - ((pros::millis() - startTime)/1000)));
+		}
+		if(loopCounter % 12 == 9){
+			// Vibrations
+			if(masterDot) master.rumble(".");
+			else if(masterDash) master.rumble("-");
+			if(partnerDot) partner.rumble(".");
+			else if(partnerDash) partner.rumble("-");
 		}
 		
 
