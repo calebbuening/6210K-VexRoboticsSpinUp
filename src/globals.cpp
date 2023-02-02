@@ -16,7 +16,7 @@
 #define CATA 'A'
 #define SHIELD 'G'
 
-#define GYRO 16
+#define GYRO 12
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
