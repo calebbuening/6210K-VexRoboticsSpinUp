@@ -33,15 +33,48 @@ void opcontrol() {
 
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
-		master.print(1, 0, "pneumatics are ready");
+		master.print(1, 0, "Pneumatics are ready");
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		catapultRelease.set_value(false);
 		master.clear();
 		pros::delay(60);
+		master.print(0,0, "Select a mode:");
+		pros::delay(60);
+		bool typeSelected = false;
+		int selectionIndex = 0;
+		while(!typeSelected){
+			// Adjust which type we have selected
+			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
+			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
+			if(selectionIndex > 3) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 3;
+
+			// Print selected type
+			switch(selectionIndex){
+				case 0: master.print(1, 0, "     Competition    "); master.print(2, 0, "    mBRO enabled    "); skills = false; mBROState = true; break;
+				case 1: master.print(1, 0, "        Skills      "); master.print(2, 0, "    mBRO enabled    "); skills = true; mBROState = true; break;
+				case 2: master.print(1, 0, "        Skills*     "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
+				case 3: master.print(1, 0, "     Competition*   "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
+			}
+			
+			if(master.get_digital_new_press(DIGITAL_A)){
+				typeSelected = true;
+
+			pros::delay(60);
+			}
+		}
+		master.clear();
+		if(!mBROState){
+			master.print(1, 0, " Ensure mCata in 17 ");
+			while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
+		}
+		master.clear();
+		selectionIndex = 0;
+		pros::delay(60);
 		master.print(0, 0, "Select an auton:");
 		pros::delay(60);
 		bool autonSelected = false;
-		int selectionIndex = 0;
+		selectionIndex = 0;
 		while(!autonSelected){
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
@@ -115,6 +148,12 @@ void opcontrol() {
 
 		if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
 
+		double motorAdjust = 1;
+
+		if(skills && !mBROState){
+			motorAdjust = .75;
+		}
+
 		// Front Left
 		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
 		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
@@ -124,12 +163,20 @@ void opcontrol() {
 		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier;
 
 		// Front Right
-		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier;
-		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier;
+		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * motorAdjust;
+		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * motorAdjust;
 
 		// Rear Right
-		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
-		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier;
+		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * motorAdjust;
+		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * motorAdjust;
+
+
+		//Cata
+		// If L2, spin retensioner
+		double cata = 0;
+		if (master.get_digital(DIGITAL_L2)) cata = 1;
+
+		mCATA = cata * 127;
 
 		// Second controller code (runs every 3 loops to prevent controller rendering errors
 		// . means normal - means somethin is up
@@ -200,37 +247,67 @@ void opcontrol() {
 		
 
 		if(!clockOverride){
+			if(!skills){
+				// String launchers
+				if(pros::millis() - startTime > 95000 && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+					stringReleased = true;
+					stringRelease.set_value(true);
+				}
 
-			// String launchers
-			if(pros::millis() - startTime > 95000 && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
-				stringReleased = true;
-				stringRelease.set_value(true);
-			}
+				// Auto string launchers
+				if(stringLauncherAuto && pros::millis() - startTime > 104000 && !stringReleased){
+					stringReleased = true;
+					stringRelease.set_value(true);
+				}
 
-			// Auto string launchers
-			if(stringLauncherAuto && pros::millis() - startTime > 104000 && !stringReleased){
-				stringReleased = true;
-				stringRelease.set_value(true);
-			}
+				// Auto shield launcher
+				if(shieldLauncherAuto && !shieldReleased && pros::millis() - startTime > 95000){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
+				}
+				
+				// Manual shield launcher
+				if(master.get_digital_new_press(DIGITAL_UP) && !shieldReleased && pros::millis() - startTime > 95000){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
+				}
 
-			// Auto shield launcher
-			if(shieldLauncherAuto && !shieldReleased && pros::millis() - startTime > 95000){
-				shieldReleased = true;
-				shieldRelease.set_value(true);
-			}
-			
-			// Manual shield launcher
-			if(master.get_digital_new_press(DIGITAL_UP) && !shieldReleased && pros::millis() - startTime > 95000){
-				shieldReleased = true;
-				shieldRelease.set_value(true);
-			}
+				// 5 second warning for endgame stuff
+				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
+					fiveSecondWarningTriggered = true;
+					master.rumble("---");
+				}
+			} else{
+				// String launchers
+				if(pros::millis() - startTime > 50000 && !stringReleased && master.get_digital_new_press(DIGITAL_R1)){
+					stringReleased = true;
+					stringRelease.set_value(true);
+				}
 
-			// 5 second warning for endgame stuff
-			if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
-				fiveSecondWarningTriggered = true;
-				master.rumble("---");
-			}
+				// Auto string launchers
+				if(stringLauncherAuto && pros::millis() - startTime > 59000 && !stringReleased){
+					stringReleased = true;
+					stringRelease.set_value(true);
+				}
+				
+				// Auto shield launcher
+				if(shieldLauncherAuto && !shieldReleased && pros::millis() - startTime > 57000){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
+				}
 
+				// Manual shield launcher
+				if(master.get_digital_new_press(DIGITAL_UP) && !shieldReleased && pros::millis() - startTime > 50000){
+					shieldReleased = true;
+					shieldRelease.set_value(true);
+				}
+
+				// 5 second warning for endgame stuff
+				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 55000){
+					fiveSecondWarningTriggered = true;
+					master.rumble("---");
+				}
+			}
 			// Clock functions override
 			if(master.get_digital_new_press(DIGITAL_B)){
 				clockOverride = true;
