@@ -30,12 +30,19 @@ void opcontrol() {
 		//while(imu.is_calibrating()) pros::delay(60);
 		master.clear();
 		pros::delay(60);
-
+		mCATA.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
 		master.print(1, 0, "Pneumatics are ready");
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		catapultRelease.set_value(false);
+		pros::delay(60);
+		mCATA.tare_position();
+		while (mCATA.get_position() < 1.9){ 
+			mCATA = 127;
+		}
+		mCATA.brake();
+		mCATA = 0;
 		master.clear();
 		pros::delay(60);
 		master.print(0,0, "Select a mode:");
@@ -65,6 +72,7 @@ void opcontrol() {
 		}
 		master.clear();
 		if(!mBROState){
+			pros::delay(60);
 			master.print(1, 0, " Ensure mCata in 17 ");
 			while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		}
@@ -126,6 +134,19 @@ void opcontrol() {
 			catapultRelease.set_value(catapultState);
 		}
 
+		if(!mBROState){
+			if (mCATA.get_position() > 0 && catapultState){
+				mCATA = -80;
+			}
+			if (mCATA.get_position() < 1.9 && !catapultState){ 
+				mCATA = 80;
+			}
+			if (mCATA.get_position() >= 1.9 && !catapultState){
+				mCATA = 0;
+				mCATA.brake();
+			}
+		}
+
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
 		double strafeJoy = master.get_analog(ANALOG_LEFT_X) / 127;
@@ -148,35 +169,58 @@ void opcontrol() {
 
 		if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
 
-		double motorAdjust = 1;
+		double leftMotorAdjust = 1;
+		double rightMotorAdjust = 1;
 
-		if(skills && !mBROState){
-			motorAdjust = .75;
+		if(!mBROState){
+			leftMotorAdjust = .75;
+		}
+
+		int intOverflow = 2147483647; //value returned when unable to communicate
+
+		// left side adjustments
+		if (mBROState && mBRO.get_voltage() == intOverflow){
+			leftMotorAdjust = leftMotorAdjust * .5;
+		}
+		if (mBRI.get_voltage() == intOverflow){
+			leftMotorAdjust = leftMotorAdjust * .5;
+		}
+		if (mFRO.get_voltage() == intOverflow){
+			leftMotorAdjust = leftMotorAdjust * .5;
+		}
+		if (mFRI.get_voltage() == intOverflow){
+			leftMotorAdjust = leftMotorAdjust * .5;
+		}
+
+		// Right side adjustment
+		if (mBLO.get_voltage() == intOverflow){
+			rightMotorAdjust = rightMotorAdjust * .5;
+		}
+		if (mBLI.get_voltage() == intOverflow){
+			rightMotorAdjust = rightMotorAdjust * .5;
+		}
+		if (mFLO.get_voltage() == intOverflow){
+			rightMotorAdjust = rightMotorAdjust * .5;
+		}
+		if (mFLI.get_voltage() == intOverflow){
+			rightMotorAdjust = rightMotorAdjust * .5;
 		}
 
 		// Front Left
-		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
-		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier;
+		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
 
 		// Rear Left
-		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127 * speedMultiplier;
-		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier;
+		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier * rightMotorAdjust;
 
 		// Front Right
-		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * motorAdjust;
-		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * motorAdjust;
+		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Rear Right
-		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * motorAdjust;
-		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * motorAdjust;
-
-
-		//Cata
-		// If L2, spin retensioner
-		double cata = 0;
-		if (master.get_digital(DIGITAL_L2)) cata = 1;
-
-		mCATA = cata * 127;
+		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Second controller code (runs every 3 loops to prevent controller rendering errors
 		// . means normal - means somethin is up
