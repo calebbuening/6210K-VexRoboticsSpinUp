@@ -130,22 +130,32 @@ void opcontrol() {
 	while (true) {
 
 		if(master.get_digital_new_press(DIGITAL_A)){
-			catapultState = !catapultState;
+			catapultState = true;
 			catapultRelease.set_value(catapultState);
+		
 		}
-
 		if(!mBROState){
 			if (mCATA.get_position() > 0 && catapultState){
-				mCATA = -80;
+				mCATA = -127;
 			}
+
+			if (mCATA.get_position() <= 0 && catapultState){
+				catapultState = false;
+				catapultRelease.set_value(catapultState);
+			}
+			
 			if (mCATA.get_position() < 1.9 && !catapultState){ 
-				mCATA = 80;
+				mCATA = 127;
 			}
+
 			if (mCATA.get_position() >= 1.9 && !catapultState){
 				mCATA = 0;
 				mCATA.brake();
 			}
+
+			
 		}
+		std::cout << mCATA.get_position() << std::endl;
 
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
