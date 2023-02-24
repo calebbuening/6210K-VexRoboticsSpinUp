@@ -11,6 +11,7 @@
 #define BLI 2
 #define FLO 20
 #define FLI 6
+#define MCATA 17
 
 #define STRING 'H'
 #define CATA 'A'
@@ -26,6 +27,8 @@ bool fiveSecondWarningTriggered = false;
 bool stringReleased = false;
 bool clockOverride = false;
 char auton = 'N';
+bool skills = false;
+bool mBROState = true;
 bool initialized = false;
 bool catapultState = false;
 bool shieldReleased = false;
@@ -50,6 +53,7 @@ pros::Motor mBLO(BLO, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTA
 pros::Motor mBLI(BLI, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Rear Left inboard
 pros::Motor mFLO(FLO, pros::E_MOTOR_GEARSET_06, true, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left outboard
 pros::Motor mFLI(FLI, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROTATIONS);	// Front Left inboard
+pros::Motor mCATA(MCATA, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_ROTATIONS); // Cata motor
 
 // Sensors
 pros::IMU imu(GYRO);

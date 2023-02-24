@@ -10,6 +10,8 @@ extern bool fiveSecondWarningTriggered;
 extern bool stringReleased;
 extern bool clockOverride;
 extern char auton;
+extern bool skills;
+extern bool mBROState;
 extern bool initialized;
 extern bool catapultState;
 extern bool shieldReleased;
@@ -34,6 +36,7 @@ extern pros::Motor mBLO;
 extern pros::Motor mBLI;
 extern pros::Motor mFLO;
 extern pros::Motor mFLI;
+extern pros::Motor mCATA;
 
 // Sensors
 extern pros::IMU imu;
