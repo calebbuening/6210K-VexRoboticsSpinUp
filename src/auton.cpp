@@ -10,7 +10,7 @@ void autonomous(){
 		int autonAdjust = 1;
 		if(auton=='Z'){
 			autonAdjust = -1;
-			driveViaIMU(3, 0);
+			driveViaIMU(3.2, 0);
 			turnViaIMU(90);
 		}
 		imu.tare();
@@ -96,7 +96,7 @@ void autonomous(){
 		driveViaIMU(-7.4, 45 * autonAdjust);
 
 		// Turn towards the goal
-		turnViaIMU(142 * autonAdjust); // was 141.5
+		turnViaIMU(143 * autonAdjust); // was 141.5
 		
 		// Delay to make sure the discs are at rest
 		pros::delay(1000);
