@@ -33,23 +33,32 @@ void opcontrol() {
 		pros::delay(60);
 		imu.tare();
 		imu.reset();
-		//while(imu.is_calibrating()) pros::delay(60);
+		while(imu.is_calibrating()) pros::delay(60);
 		master.clear();
+
 		pros::delay(60);
+
+		// Make sure the catapult holds
 		mCATA.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+		// Lock in the catapult pneumatic
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
 		master.print(1, 0, "Pneumatics are ready");
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		catapultRelease.set_value(false);
 		pros::delay(60);
+
+		// Set current position to 0, then load catapult
 		mCATA.tare_position();
-		while (mCATA.get_position() < 1.9){ 
+		while (mCATA.get_position() < 3.6){ 
 			mCATA = 127;
 		}
 		mCATA.brake();
 		mCATA = 0;
 		master.clear();
+
+		// Select mode
 		pros::delay(60);
 		master.print(0,0, "Select a mode:");
 		pros::delay(60);
@@ -77,12 +86,16 @@ void opcontrol() {
 			}
 		}
 		master.clear();
+
+		// If we are in catapult mode, make sure the catapult is in the right port
 		if(!mBROState){
 			pros::delay(60);
 			master.print(1, 0, " Ensure mCata in 17 ");
 			while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		}
 		master.clear();
+
+		// Select auton type
 		selectionIndex = 0;
 		pros::delay(60);
 		master.print(0, 0, "Select an auton:");
@@ -121,7 +134,6 @@ void opcontrol() {
 		initialized = true;
 	}
 
-	
 	// Start clock for measuring the driver part of the match
 	if(pros::competition::is_connected() && !pros::competition::is_autonomous() && !pros::competition::is_disabled()){
 		startTime = pros::millis();
@@ -135,31 +147,36 @@ void opcontrol() {
 
 	while (true) {
 
+		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
 			catapultState = true;
 			catapultRelease.set_value(catapultState);
 		
 		}
+
+		// If using the catapult
 		if(!mBROState){
+			// If not at the loaded position, get there
 			if (mCATA.get_position() > 0 && catapultState){
 				mCATA = -127;
 			}
 
+			// If at the loaded position and we have fired, reload the pneumatic
 			if (mCATA.get_position() <= 0 && catapultState){
 				catapultState = false;
 				catapultRelease.set_value(catapultState);
 			}
 			
-			if (mCATA.get_position() < 1.9 && !catapultState){ 
+			// If near and not fired, release tension
+			if (mCATA.get_position() < 3.6 && !catapultState){ 
 				mCATA = 127;
 			}
 
-			if (mCATA.get_position() >= 1.9 && !catapultState){
+			// If at the very bottom and not fired, hold
+			if (mCATA.get_position() >= 3.6 && !catapultState){
 				mCATA = 0;
 				mCATA.brake();
 			}
-
-			
 		}
 		std::cout << mCATA.get_position() << std::endl;
 
