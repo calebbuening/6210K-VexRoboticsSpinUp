@@ -103,6 +103,7 @@ void autonomous(){
 
 		// Fire the catapult
 		catapultRelease.set_value(true);
+		catapultState = true;
 	}	
 
 	if(auton == 'A'){

@@ -76,7 +76,7 @@ void opcontrol() {
 				case 0: master.print(1, 0, "     Competition    "); master.print(2, 0, "    mBRO enabled    "); skills = false; mBROState = true; break;
 				case 1: master.print(1, 0, "        Skills      "); master.print(2, 0, "    mBRO enabled    "); skills = true; mBROState = true; break;
 				case 2: master.print(1, 0, "        Skills*     "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
-				case 3: master.print(1, 0, "     Competition*   "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
+				case 3: master.print(1, 0, "     Competition*   "); master.print(2, 0, "    Re-tensioner    "); skills = false; mBROState = false; break;
 			}
 			
 			if(master.get_digital_new_press(DIGITAL_A)){
@@ -157,7 +157,7 @@ void opcontrol() {
 		// If using the catapult
 		if(!mBROState){
 			// If not at the loaded position, get there
-			if (mCATA.get_position() > 0 && catapultState){
+			if (mCATA.get_position() > -.1 && catapultState){
 				mCATA = -127;
 			}
 
