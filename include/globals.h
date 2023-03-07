@@ -42,4 +42,6 @@ extern pros::Motor mCATA;
 extern pros::IMU imu;
 extern pros::GPS gps;
 
+extern void reloadCatapult();
+
 #endif // _GLOBALS_H_

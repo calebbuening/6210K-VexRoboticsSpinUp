@@ -22,6 +22,8 @@
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
 
+#define STD 10 // The standard task delay
+
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;
 bool stringReleased = false;
@@ -58,3 +60,22 @@ pros::Motor mCATA(MCATA, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_
 // Sensors
 pros::IMU imu(GYRO);
 pros::GPS gps(GPS_PORT, GPS_OFFSET_X, GPS_OFFSET_Y);
+
+void reloadCatapult(){
+	// Wait for the catapult to fully fire
+	pros::Task::delay(500);
+
+	// Lower the catapult
+	mCATA = -127;
+	while(mCATA.get_position() > -.1) pros::Task::delay(STD);
+	mCATA = 0;
+	
+	// Lock pneumatic once all the way down
+	catapultRelease.set_value(false);
+	
+	// Tension the catapult
+	mCATA = 127;
+	while(mCATA.get_position() < 3.6) pros::Task::delay(STD);
+	mCATA = 0;
+	mCATA.brake();
+}

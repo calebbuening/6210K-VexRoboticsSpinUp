@@ -149,34 +149,8 @@ void opcontrol() {
 
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
-			catapultState = true;
-			catapultRelease.set_value(catapultState);
-		
-		}
-
-		// If using the catapult
-		if(!mBROState){
-			// If not at the loaded position, get there
-			if (mCATA.get_position() > -.1 && catapultState){
-				mCATA = -127;
-			}
-
-			// If at the loaded position and we have fired, reload the pneumatic
-			if (mCATA.get_position() <= 0 && catapultState){
-				catapultState = false;
-				catapultRelease.set_value(catapultState);
-			}
-			
-			// If near and not fired, release tension
-			if (mCATA.get_position() < 3.6 && !catapultState){ 
-				mCATA = 127;
-			}
-
-			// If at the very bottom and not fired, hold
-			if (mCATA.get_position() >= 3.6 && !catapultState){
-				mCATA = 0;
-				mCATA.brake();
-			}
+			catapultRelease.set_value(true);
+			if(!mBROState) pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 		}
 		std::cout << mCATA.get_position() << std::endl;
 
