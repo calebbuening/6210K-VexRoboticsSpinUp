@@ -107,44 +107,45 @@ void autonomous(){
 	}	
 
 	if(auton == 'A'){
-		// Score the first roller
+		//Score match loads
+		for(int i = 0; i <= 3; i++){
+			matchLoadDisks();
+		}
+		// get out from wall
+		driveViaIMU(1, 0);
+		//turn and drive to face roller, score
+		turnViaIMU(90);
+		driveViaIMU(-4, 90);
+		turnViaIMU(180);
 		eliScoreRoller();
-
-		// Score the second roller
-		driveViaIMU(-2.3, 0);
+		// drive and score roller 2
+		driveViaIMU(-1.5);
+		turnViaIMU(270);
+		eliScoreRoller();
+		// drive through low zone and score roller 3
+		driveViaIMU(-1);
+		turnViaIMU(360);
+		driveViaTime(4000, true, 200);
+		imu.tare();
+		driveViaIMU(-.1, 0);
+		turnViaIMU(90);
+		driveViaIMU(3, 90);
+		strafeViaIMU(2, 90);
+		driveViaIMU(4.5, 90);
+		turnViaIMU(0);
+		eliScoreRoller();
+		//score roller 4
+		driveViaIMU(-1.5, 0);
 		turnViaIMU(90);
 		driveViaIMU(.5, 90);
 		eliScoreRoller();
-
-		// Cross the field and turn towards the next roller
-		driveViaIMU(-3.3, 90); // -2.5, -2.8
-		turnViaIMU(225);
-		driveViaIMU(17.3, 225);
-		turnViaIMU(180);
-
-		// Score the third roller
-		driveViaIMU(1.5, 180); // was 2.1
-		eliScoreRoller();
-
-		// Score the fourth roller
-		driveViaIMU(-2.5, 180); // 2.25
-		turnViaIMU(270);
-		driveViaIMU(2.25, 270);
-		eliScoreRoller();
-
-		// Turn and launch string
-		driveViaIMU(-2.5, 270);
-		turnViaIMU(225);
-		driveViaIMU(1.25, 225);
-
-		// Endgame
+		// fire endgame
+		driveViaIMU(-1.5);
+		turnViaIMU(45);
 		stringRelease.set_value(true);
-
-		pros::delay(1000);
+		driveViaIMU(1, 45);
+		driveViaIMU(-.6, 45)
 		
-		// Get some string slack
-		driveViaIMU(1, 225);
-		driveViaIMU(-.5, 225);
 	}
 
 	if(auton == 'L'){
