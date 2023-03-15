@@ -109,7 +109,7 @@ void autonomous(){
 	if(auton == 'A'){
 		//Score match loads
 		for(int i = 0; i <= 3; i++){
-			matchLoadDisks();
+			//matchLoadDisks();
 		}
 		// get out from wall
 		driveViaIMU(1, 0);
@@ -119,18 +119,18 @@ void autonomous(){
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 2
-		driveViaIMU(-1.5);
+		driveViaIMU(-1.5, 180);
 		turnViaIMU(270);
 		eliScoreRoller();
 		// drive through low zone and score roller 3
-		driveViaIMU(-1);
+		driveViaIMU(-1, 270);
 		turnViaIMU(360);
-		driveViaTime(4000, true, 200);
+		//driveViaTime(4000, true, 200);
 		imu.tare();
 		driveViaIMU(-.1, 0);
 		turnViaIMU(90);
 		driveViaIMU(3, 90);
-		strafeViaIMU(2, 90);
+		//strafeViaIMU(2, 90);
 		driveViaIMU(4.5, 90);
 		turnViaIMU(0);
 		eliScoreRoller();
@@ -140,11 +140,11 @@ void autonomous(){
 		driveViaIMU(.5, 90);
 		eliScoreRoller();
 		// fire endgame
-		driveViaIMU(-1.5);
+		driveViaIMU(-1.5, 90);
 		turnViaIMU(45);
 		stringRelease.set_value(true);
 		driveViaIMU(1, 45);
-		driveViaIMU(-.6, 45)
+		driveViaIMU(-.6, 45);
 		
 	}
 
@@ -306,5 +306,8 @@ void autonomous(){
 		mFLI = 0;
 
 		pros::delay(2000);
+	}
+	if(auton == 'T'){
+		driveViaIMU(3, 0);
 	}
 }

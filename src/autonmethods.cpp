@@ -130,24 +130,6 @@ void turnViaIMU(double heading){
 	mFLI.move_velocity(0);
 }
 
-// Drive guided by IMU
-void driveViaDist(double dist)
-{
-	// To in. then to rev, then to square 39.3701 instead of 24 for meters
-	double pos = (mBRO.get_position() + mBLO.get_position())/2;
-	mBRO.move_relative(dist, 200);
-	mBRI.move_relative(dist, 200);
-	mFRO.move_relative(dist, 200);
-	mFRI.move_relative(dist, 200);
-	mBLO.move_relative(dist, 200);
-	mBLI.move_relative(dist, 200);
-	mFLO.move_relative(dist, 200);
-	mFLI.move_relative(dist, 200);
-	while (!((((mBRO.get_position() + mBLO.get_position())/2) < (pos + dist) + .1) && (((mBRO.get_position() + mBLO.get_position())/2) > (pos + dist) - .1))) {
-		pros::delay(1000);
-	}
-}
-
 void driveViaIMU(double dist, double heading){
 	mBRI.tare_position();
 	mBLI.tare_position();
@@ -202,6 +184,47 @@ void driveViaIMU(double dist, double heading){
 	mBLI.move_velocity(0);
 	mFLO.move_velocity(0);
 	mFLI.move_velocity(0);
+}
+
+void newDriveViaIMU(double dist, double heading){
+	mBRI.tare_position();
+	mBLI.tare_position();
+	double pos = 0;
+	double error = 0;
+
+	while(std::fabs(pos - dist) > .25){
+		double pos = (mBRI.get_position() + mBLI.get_position())/2;
+		double speed = (dist - pos) * 50;
+		double error = heading - imu.get_rotation();
+		double turn = error * .001;
+
+		const double leftJoy = speed;
+		const double rightJoy = turn;
+
+		// Front Left
+		mBRI = (leftJoy - rightJoy) * 127;
+
+		// Rear Left
+		mFRO = (leftJoy - rightJoy) * 127;
+		mFRI = (leftJoy - rightJoy) * 127;
+
+		// Front Right
+		mBLO = (leftJoy + rightJoy) * 127;
+		mBLI = (leftJoy + rightJoy) * 127;
+
+		// Rear Right
+		mFLO = (leftJoy + rightJoy) * 127;
+		mFLI = (leftJoy + rightJoy) * 127;
+		pros::delay(5);
+		std::cout << (pos - dist) << std::endl;
+	}
+	mBRI = 0;
+	mBRO = 0;
+	mFRI = 0;
+	mBLO = 0;
+	mBLI = 0;
+	mFLO = 0;
+	mFLI = 0;
 }
 void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
 	mBRI.tare_position();
