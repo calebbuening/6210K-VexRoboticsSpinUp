@@ -186,46 +186,6 @@ void driveViaIMU(double dist, double heading){
 	mFLI.move_velocity(0);
 }
 
-void newDriveViaIMU(double dist, double heading){
-	mBRI.tare_position();
-	mBLI.tare_position();
-	double pos = 0;
-	double error = 0;
-
-	while(std::fabs(pos - dist) > .25){
-		double pos = (mBRI.get_position() + mBLI.get_position())/2;
-		double speed = (dist - pos) * 50;
-		double error = heading - imu.get_rotation();
-		double turn = error * .001;
-
-		const double leftJoy = speed;
-		const double rightJoy = turn;
-
-		// Front Left
-		mBRI = (leftJoy - rightJoy) * 127;
-
-		// Rear Left
-		mFRO = (leftJoy - rightJoy) * 127;
-		mFRI = (leftJoy - rightJoy) * 127;
-
-		// Front Right
-		mBLO = (leftJoy + rightJoy) * 127;
-		mBLI = (leftJoy + rightJoy) * 127;
-
-		// Rear Right
-		mFLO = (leftJoy + rightJoy) * 127;
-		mFLI = (leftJoy + rightJoy) * 127;
-		pros::delay(5);
-		std::cout << (pos - dist) << std::endl;
-	}
-	mBRI = 0;
-	mBRO = 0;
-	mFRI = 0;
-	mBLO = 0;
-	mBLI = 0;
-	mFLO = 0;
-	mFLI = 0;
-}
 void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
 	mBRI.tare_position();
 	mBLI.tare_position();
@@ -327,7 +287,41 @@ void driveViaTime(double time, bool forward, double vel){
 }
 
 
-void matchLoadDisks(){ 
+void matchLoadDisks(){
+
+	/* Function order:
+	 * 1. Shoot the preload
+	 * 2. Begin reloading catapult
+	 * 3. Undo the arc
+	 * 4. Drive reverse into loading area
+	 * 5. Wait for disc to be loaded
+	 * 6. Arc towards the goal
+	 * 7. Repeat steps 1-6
+	*/
+
+	// Arc towards the goal
+	double pos = 0;
+	mBLO.tare_position();
+	mBLI.tare_position();
+	while(pos < .7){
+		mBLO.move_velocity(160);
+		mBLI.move_velocity(160);
+		mFLO.move_velocity(160);
+		mFLI.move_velocity(160);
+		mBRI.move_velocity(0); // was -10, -5, 0, still needs a bit more
+		mFRI.move_velocity(0); 
+		mFRO.move_velocity(0);
+		pos = (mBLO.get_position() + mBLI.get_position())/2;
+		pros::delay(5);
+	}
+
+/*
+	// Shoot preloads
+	catapultRelease.set_value(true);
+
+	// Begin reloading catapult
+	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
+
 	pros::delay(750);
 	mBLO.tare_position();
 	mBLI.tare_position();
@@ -346,14 +340,11 @@ void matchLoadDisks(){
 	mBLO.tare_position();
 	mBLI.tare_position();
 	pos = (mBLO.get_position() + mBLI.get_position())/2;
-	while(pos > -1){
-		mBLO.move_velocity(-80);
-		mBLI.move_velocity(-80);
-		mFLO.move_velocity(-80);
-		mFLI.move_velocity(-80);
-		pos = (mBLO.get_position() + mBLI.get_position())/2;
-		pros::delay(5);
-	}
+
+// cut here
+
+
+
 	startTime = pros::millis();
 	while (pros::millis() - startTime > 100){
 		mBLO.move_velocity(-80);
@@ -373,5 +364,5 @@ void matchLoadDisks(){
 	mBRI.move_velocity(0);
 	mFRO.move_velocity(0);
 	mFRI.move_velocity(0);
-
+	*/
 }

@@ -109,8 +109,10 @@ void autonomous(){
 	if(auton == 'A'){
 		//Score match loads
 		for(int i = 0; i <= 3; i++){
-			//matchLoadDisks();
+			matchLoadDisks();
 		}
+
+		/*
 		// get out from wall
 		driveViaIMU(1, 0);
 		//turn and drive to face roller, score
@@ -145,7 +147,7 @@ void autonomous(){
 		stringRelease.set_value(true);
 		driveViaIMU(1, 45);
 		driveViaIMU(-.6, 45);
-		
+		*/
 	}
 
 	if(auton == 'L'){

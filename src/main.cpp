@@ -51,11 +51,7 @@ void opcontrol() {
 
 		// Set current position to 0, then load catapult
 		mCATA.tare_position();
-		while (mCATA.get_position() < 3.6){ 
-			mCATA = 127;
-		}
-		mCATA.brake();
-		mCATA = 0;
+		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 		master.clear();
 
 		// Select mode

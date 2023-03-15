@@ -8,3 +8,6 @@ extern void turnViaIMU(double heading);
 
 // Drive guided by IMU
 extern void driveViaIMU(double dist, double heading);
+
+// Auton Methods
+extern void matchLoadDisks();
