@@ -11,3 +11,4 @@ extern void driveViaIMU(double dist, double heading);
 
 // Auton Methods
 extern void matchLoadDisks();
+extern void driveViaTime(double time, double vel);

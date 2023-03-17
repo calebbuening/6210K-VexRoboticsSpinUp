@@ -242,48 +242,25 @@ void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
 	mFLI.move_velocity(0);
 }
 
-void driveViaTime(double time, bool forward, double vel){
+void driveViaTime(double time, double vel){
 	startTime = pros::millis();
-	if (forward){
-		while(pros::millis() - startTime < time){
-				mBRO.move_velocity(vel);
-				mBRI.move_velocity(vel);
-				mFRO.move_velocity(vel);
-				mFRI.move_velocity(vel);
-				mBLO.move_velocity(vel);
-				mBLI.move_velocity(vel);
-				mFLO.move_velocity(vel);
-				mFLI.move_velocity(vel);
-			}
-			mBRO.move_velocity(0);
-			mBRI.move_velocity(0);
-			mFRO.move_velocity(0);
-			mFRI.move_velocity(0);
-			mBLO.move_velocity(0);
-			mBLI.move_velocity(0);
-			mFLO.move_velocity(0);
-			mFLI.move_velocity(0);
-	} else{
-		while(pros::millis() - startTime < time){
-			mBRO.move_velocity(-vel);
-			mBRI.move_velocity(-vel);
-			mFRO.move_velocity(-vel);
-			mFRI.move_velocity(-vel);
-			mBLO.move_velocity(-vel);
-			mBLI.move_velocity(-vel);
-			mFLO.move_velocity(-vel);
-			mFLI.move_velocity(-vel);
-		}
-		mBRO.move_velocity(0);
-		mBRI.move_velocity(0);
-		mFRO.move_velocity(0);
-		mFRI.move_velocity(0);
-		mBLO.move_velocity(0);
-		mBLI.move_velocity(0);
-		mFLO.move_velocity(0);
-		mFLI.move_velocity(0);
+	while(pros::millis() - startTime < time){
+		mBRI.move_velocity(vel);
+		mFRO.move_velocity(vel);
+		mFRI.move_velocity(vel);
+		mBLO.move_velocity(vel);
+		mBLI.move_velocity(vel);
+		mFLO.move_velocity(vel);
+		mFLI.move_velocity(vel);
+		pros::delay(10);
 	}
-
+	mBRI.move_velocity(0);
+	mFRO.move_velocity(0);
+	mFRI.move_velocity(0);
+	mBLO.move_velocity(0);
+	mBLI.move_velocity(0);
+	mFLO.move_velocity(0);
+	mFLI.move_velocity(0);
 }
 
 
@@ -299,21 +276,15 @@ void matchLoadDisks(){
 	 * 7. Repeat steps 1-6
 	*/
 
-	// Arc towards the goal
-	double pos = 0;
-	mBLO.tare_position();
-	mBLI.tare_position();
-	while(pos < .7){
-		mBLO.move_velocity(160);
-		mBLI.move_velocity(160);
-		mFLO.move_velocity(160);
-		mFLI.move_velocity(160);
-		mBRI.move_velocity(0); // was -10, -5, 0, still needs a bit more
-		mFRI.move_velocity(0); 
-		mFRO.move_velocity(0);
-		pos = (mBLO.get_position() + mBLI.get_position())/2;
-		pros::delay(5);
-	}
+	driveViaIMU(.5, 0);
+	turnViaIMU(90);
+	driveViaIMU(.5, 90);
+	catapultRelease.set_value(true);
+	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
+	driveViaIMU(-.5, 90);
+	turnViaIMU(0);
+	driveViaIMU(-.5, 0);
+	driveViaTime(1000, -100);
 
 /*
 	// Shoot preloads
