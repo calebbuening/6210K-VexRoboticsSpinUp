@@ -17,7 +17,9 @@
 #define CATA 'A'
 #define SHIELD 'G'
 
+
 #define GYRO 12
+#define LSD 5
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
@@ -60,6 +62,7 @@ pros::Motor mCATA(MCATA, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_
 // Sensors
 pros::IMU imu(GYRO);
 pros::GPS gps(GPS_PORT, GPS_OFFSET_X, GPS_OFFSET_Y);
+pros::Distance lsd(LSD);
 
 void reloadCatapult(){
 	// Wait for the catapult to fully fire

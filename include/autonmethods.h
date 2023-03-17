@@ -10,5 +10,5 @@ extern void turnViaIMU(double heading);
 extern void driveViaIMU(double dist, double heading);
 
 // Auton Methods
-extern void matchLoadDisks();
+extern void matchLoadDisks(double lsdTarget);
 extern void driveViaTime(double time, double vel);

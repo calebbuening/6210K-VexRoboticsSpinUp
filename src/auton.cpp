@@ -108,8 +108,9 @@ void autonomous(){
 
 	if(auton == 'A'){
 		//Score match loads
+		double distTarget = lsd.get();
 		for(int i = 0; i < 1; i++){
-			matchLoadDisks();
+			matchLoadDisks(distTarget);
 		}
 
 		/*
@@ -310,6 +311,10 @@ void autonomous(){
 		pros::delay(2000);
 	}
 	if(auton == 'T'){
-		driveViaIMU(3, 0);
+		while(true){
+			double dist = lsd.get();
+			std::cout << dist << std::endl;
+			pros::delay(1000);
+		}
 	}
 }

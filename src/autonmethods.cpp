@@ -264,7 +264,7 @@ void driveViaTime(double time, double vel){
 }
 
 
-void matchLoadDisks(){
+void matchLoadDisks(double lsdTarget){
 
 	/* Function order:
 	 * 1. Shoot the preload
@@ -285,6 +285,10 @@ void matchLoadDisks(){
 	turnViaIMU(0);
 	driveViaIMU(-.5, 0);
 	driveViaTime(1000, -100);
+	double dist = lsd.get();
+	while (dist < lsdTarget){
+		// strafe right
+	}
 
 /*
 	// Shoot preloads

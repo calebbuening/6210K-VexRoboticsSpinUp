@@ -41,6 +41,7 @@ extern pros::Motor mCATA;
 // Sensors
 extern pros::IMU imu;
 extern pros::GPS gps;
+extern pros::Distance lsd;
 
 extern void reloadCatapult();
 
