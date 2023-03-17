@@ -14,3 +14,6 @@ The amazing code repo for all the PROS code of 2021-2022.
     * Also includes all of COPilot - python code, model files, etc.
       * This Copilot code is more prone to changes/testing, as well as total deletions and developments
 
+### Current Projects
+* UE5 Simulation - Building on original Auton helper and taking advantage of UE5 AI and Sim tools
+* Ultrasonic Auton Blocker - Tune in to worlds 😉
