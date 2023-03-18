@@ -78,7 +78,7 @@ void reloadCatapult(){
 	
 	// Tension the catapult
 	mCATA = 127;
-	while(mCATA.get_position() < 3.6) pros::Task::delay(STD);
+	while(mCATA.get_position() < 3.7) pros::Task::delay(STD);
 	mCATA = 0;
 	mCATA.brake();
 }

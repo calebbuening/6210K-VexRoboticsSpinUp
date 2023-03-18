@@ -109,22 +109,29 @@ void autonomous(){
 	if(auton == 'A'){
 		//Score match loads
 		double distTarget = lsd.get();
-		for(int i = 0; i < 1; i++){
+		for(int i = 0; i <= 1; i++){
 			matchLoadDisks(distTarget);
 		}
-
-		/*
-		// get out from wall
-		driveViaIMU(1, 0);
-		//turn and drive to face roller, score
+		// Third shot
+		pros::delay(1000);
+		driveViaIMU(.5, 0);
 		turnViaIMU(90);
-		driveViaIMU(-4, 90);
+		driveViaIMU(.54, 90);
+		pros::delay(700);
+		catapultRelease.set_value(true);
+		catapultState = true;
+		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
+
+		//turn and drive to face roller, score
+		driveViaIMU(-8, 90);
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 2
-		driveViaIMU(-1.5, 180);
+		driveViaIMU(-2.5, 180);
 		turnViaIMU(270);
+		driveViaIMU(1, 270);
 		eliScoreRoller();
+		/*
 		// drive through low zone and score roller 3
 		driveViaIMU(-1, 270);
 		turnViaIMU(360);

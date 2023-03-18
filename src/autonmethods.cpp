@@ -159,8 +159,8 @@ void driveViaIMU(double dist, double heading){
 		while(pos > dist){
 			double error = heading - imu.get_rotation();
 			int rotation;
-			if(std::fabs(error) < 30){
-				rotation = (6 * error); // Was 6
+			if(std::fabs(error) < 15){
+				rotation = (12 * error); // Was 6
 			}else{
 				rotation = 200 * sgn(error); // was 200
 			}
@@ -263,6 +263,26 @@ void driveViaTime(double time, double vel){
 	mFLI.move_velocity(0);
 }
 
+double getLSD(float rangeStart, float rangeStop){
+	double dist;
+	std::vector<double> values;
+
+	for (double i = rangeStart; i <= rangeStop; i ++){
+		values.push_back(i);
+	}
+	bool isInRange = false;
+	while (!isInRange){
+		dist = lsd.get();
+		for (int i = 0; i < values.size() + 1; i++){
+			if (std::abs(dist - values[i]) < .0001){
+				isInRange = true;
+				break;
+			}
+		}
+	if (isInRange) break;
+	}
+	return dist;
+}
 
 void matchLoadDisks(double lsdTarget){
 
@@ -275,93 +295,47 @@ void matchLoadDisks(double lsdTarget){
 	 * 6. Arc towards the goal
 	 * 7. Repeat steps 1-6
 	*/
-
+	pros::delay(1000);
 	driveViaIMU(.5, 0);
 	turnViaIMU(90);
-	driveViaIMU(.5, 90);
+	driveViaIMU(.54, 90);
+	pros::delay(700);
 	catapultRelease.set_value(true);
+	catapultState = true;
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	driveViaIMU(-.5, 90);
+	driveViaIMU(-2.5, 90);
 	turnViaIMU(0);
-	driveViaIMU(-.5, 0);
+	driveViaIMU(-.4, 0);
 	driveViaTime(500, -100);
-	double dist = lsd.get();
-	if (dist < lsdTarget){
-		while (dist < lsdTarget)
-			mBRO.move_velocity(-200 - rotation);
-			mBRI.move_velocity(-200 - rotation);
-			mFRO.move_velocity(200 - rotation);
-			mFRI.move_velocity(200 - rotation);
-			mBLO.move_velocity(200 + rotation);
-			mBLI.move_velocity(200 + rotation);
-			mFLO.move_velocity(-200 + rotation);
-			mFLI.move_velocity(-200 + rotation);
-			dist = lsd.get();
-			pros::delay(10);
-	} else{
-		while (dist > lsdTarget){ //strafe right
-			mBRO.move_velocity(200 - rotation);
-			mBRI.move_velocity(200 - rotation);
-			mFRO.move_velocity(-200 - rotation);
-			mFRI.move_velocity(-200 - rotation);
-			mBLO.move_velocity(-200 + rotation * (.75 + mBROState));
-			mBLI.move_velocity(-200 + rotation * (.75 + mBROState));
-			mFLO.move_velocity(200 + rotation * (.75 + mBROState));
-			mFLI.move_velocity(200 + rotation * (.75 + mBROState));
+	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
+	if (dist < (lsdTarget - 40)){
+		while (dist < (lsdTarget - 40)){
+			mBRO.move_velocity(50);
+			mBRI.move_velocity(50);
+			mFRO.move_velocity(-50);
+			mFRI.move_velocity(-50);
+			mBLO.move_velocity(-50);
+			mBLI.move_velocity(-50);
+			mFLO.move_velocity(50);
+			mFLI.move_velocity(50);
 			dist = lsd.get();
 			pros::delay(10);
 		}
-		driveViaTime(200, -100);
 	}
-
-/*
-	// Shoot preloads
-	catapultRelease.set_value(true);
-
-	// Begin reloading catapult
-	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-
-	pros::delay(750);
-	mBLO.tare_position();
-	mBLI.tare_position();
-	double pos = (mBLO.get_position() + mBLI.get_position())/2;
-	while(pos < 1){ // Distance to arc turn
-		mBLO.move_velocity(80);
-		mBLI.move_velocity(80);
-		mFLO.move_velocity(80);
-		mFLI.move_velocity(80);
-		pos = (mBLO.get_position() + mBLI.get_position())/2;
-		pros::delay(5);
+	if (dist > (lsdTarget + 40)){
+		while (dist > (lsdTarget + 40)){ //strafe right
+			mBRO.move_velocity(-50);
+			mBRI.move_velocity(-50);
+			mFRO.move_velocity(50);
+			mFRI.move_velocity(50);
+			mBLO.move_velocity(50 * (.75 + mBROState));
+			mBLI.move_velocity(50 * (.75 + mBROState));
+			mFLO.move_velocity(-50 * (.75 + mBROState));
+			mFLI.move_velocity(-50 * (.75 + mBROState));
+			dist = lsd.get();
+			pros::delay(10);
+		}
 	}
-	pros::delay(100);
-	catapultRelease.set_value(true);
-	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	mBLO.tare_position();
-	mBLI.tare_position();
-	pos = (mBLO.get_position() + mBLI.get_position())/2;
+	driveViaTime(200, -100);
 
-// cut here
-
-
-
-	startTime = pros::millis();
-	while (pros::millis() - startTime > 100){
-		mBLO.move_velocity(-80);
-		mBLI.move_velocity(-80);
-		mFLO.move_velocity(-80);
-		mFLI.move_velocity(-80);
-		mBRO.move_velocity(-80);
-		mBRI.move_velocity(-80);
-		mFRO.move_velocity(-80);
-		mFRI.move_velocity(-80);
-	}
-	mBLO.move_velocity(0);
-	mBLI.move_velocity(0);
-	mFLO.move_velocity(0);
-	mFLI.move_velocity(0);
-	mBRO.move_velocity(0);
-	mBRI.move_velocity(0);
-	mFRO.move_velocity(0);
-	mFRI.move_velocity(0);
-	*/
 }
