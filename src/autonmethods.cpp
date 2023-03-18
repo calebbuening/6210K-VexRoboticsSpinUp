@@ -186,7 +186,7 @@ void driveViaIMU(double dist, double heading){
 	mFLI.move_velocity(0);
 }
 
-void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
+void strafeViaIMU(double dist, double heading, double motorAdjust){ //positive dist is strafe right
 	mBRI.tare_position();
 	mBLI.tare_position();
 	double pos = (mBRI.get_position() + mBLI.get_position())/2;
@@ -204,10 +204,10 @@ void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
 			mBRI.move_velocity(200 - rotation);
 			mFRO.move_velocity(-200 + rotation);
 			mFRI.move_velocity(-200 + rotation);
-			mBLO.move_velocity(-200 + rotation);
-			mBLI.move_velocity(-200 + rotation);
-			mFLO.move_velocity(200 + rotation);
-			mFLI.move_velocity(200 + rotation);
+			mBLO.move_velocity(-200 + rotation * (.75 + mBROState)); //adjust for motor
+			mBLI.move_velocity(-200 + rotation * (.75 + mBROState));
+			mFLO.move_velocity(200 + rotation * (.75 + mBROState));
+			mFLI.move_velocity(200 + rotation * (.75 + mBROState));
 			pos = (mFLI.get_position() + mFLO.get_position())/2;
 			pros::delay(5);
 		}
@@ -224,10 +224,10 @@ void strafeViaIMU(double dist, double heading){ //positive dist is strafe right
 			mBRI.move_velocity(-200 - rotation);
 			mFRO.move_velocity(200 - rotation);
 			mFRI.move_velocity(200 - rotation);
-			mBLO.move_velocity(200 + rotation);
-			mBLI.move_velocity(200 + rotation);
-			mFLO.move_velocity(-200 + rotation);
-			mFLI.move_velocity(-200 + rotation);
+			mBLO.move_velocity(200 + rotation * (.75 + mBROState));
+			mBLI.move_velocity(200 + rotation * (.75 + mBROState));
+			mFLO.move_velocity(-200 + rotation * (.75 + mBROState));
+			mFLI.move_velocity(-200 + rotation * (.75 + mBROState));
 			pos = (mFLI.get_position() + mFLO.get_position())/2;
 			pros::delay(5);
 		}
@@ -284,10 +284,34 @@ void matchLoadDisks(double lsdTarget){
 	driveViaIMU(-.5, 90);
 	turnViaIMU(0);
 	driveViaIMU(-.5, 0);
-	driveViaTime(1000, -100);
+	driveViaTime(500, -100);
 	double dist = lsd.get();
-	while (dist < lsdTarget){
-		// strafe right
+	if (dist < lsdTarget){
+		while (dist < lsdTarget)
+			mBRO.move_velocity(-200 - rotation);
+			mBRI.move_velocity(-200 - rotation);
+			mFRO.move_velocity(200 - rotation);
+			mFRI.move_velocity(200 - rotation);
+			mBLO.move_velocity(200 + rotation);
+			mBLI.move_velocity(200 + rotation);
+			mFLO.move_velocity(-200 + rotation);
+			mFLI.move_velocity(-200 + rotation);
+			dist = lsd.get();
+			pros::delay(10);
+	} else{
+		while (dist > lsdTarget){ //strafe right
+			mBRO.move_velocity(200 - rotation);
+			mBRI.move_velocity(200 - rotation);
+			mFRO.move_velocity(-200 - rotation);
+			mFRI.move_velocity(-200 - rotation);
+			mBLO.move_velocity(-200 + rotation * (.75 + mBROState));
+			mBLI.move_velocity(-200 + rotation * (.75 + mBROState));
+			mFLO.move_velocity(200 + rotation * (.75 + mBROState));
+			mFLI.move_velocity(200 + rotation * (.75 + mBROState));
+			dist = lsd.get();
+			pros::delay(10);
+		}
+		driveViaTime(200, -100);
 	}
 
 /*
