@@ -1,5 +1,5 @@
-# 6210K-VexRoboticsSpinUp - Research and Development
-The amazing code repo for all the PROS code of 2021-2022.
+# 6210K-VexRoboticsSpinUp - BullyBot code
+The amazing code repo for all the PROS code of 2022-2023.
 
 ### Authors:
 * Caleb Buening
