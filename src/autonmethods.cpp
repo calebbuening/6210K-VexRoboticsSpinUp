@@ -339,3 +339,38 @@ void matchLoadDisks(double lsdTarget){
 	driveViaTime(200, -100);
 
 }
+
+/////////////////PROTOTYPE METHODS//////////////////////
+
+void logData(){
+	/*
+	Goals
+	1. take a snapshot of the field
+	2. set 7 distinctly different signatures
+	a. One option is find the most prevalent sifferent sigs, don't know how to do that
+	b. or start at these spots
+	________________________________
+	|			    X				|
+	|								|
+	|	X			X			X   |
+	|								|
+	|   X			X			X   |
+	|_______________________________|
+	and move a certain direction until significantly different sigs
+	c. or start at the zero point and move out until different sigs
+	3. read all objects with these 7 sigs
+	4. stitch into one master image with positional data
+	5. Find a robot on the field, confirm with distance sensor
+	6. pop up the blocker
+	*/
+	// CURRENT CODE - UNTESTED
+	// gets 10 largest objects and saves all data to sd card
+	pros::vision_object_s_t objects[VISION_PRECISION]; // this is precision, change as needed
+	vision.read_by_size(0, VISION_PRECISION, sigs);
+	std::ofstream dataFile;
+	dataFile.open("/usd/data.csv", std::ios_base::app);
+	for (i=0, i <= VISION_PRECISION, i++){
+		dataFile << objects[i] << ":";
+	}
+	dataFile << lsd.get() << std::endl;	
+}
