@@ -109,6 +109,10 @@ void autonomous(){
 	if(auton == 'A'){
 		//Score match loads
 		double distTarget = lsd.get();
+		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
+			distTarget = lsd.get();
+			pros::delay(5);
+		} 
 		for(int i = 0; i <= 1; i++){
 			matchLoadDisks(distTarget);
 		}
@@ -131,15 +135,71 @@ void autonomous(){
 		turnViaIMU(270);
 		driveViaIMU(1, 270);
 		eliScoreRoller();
-		/*
-		// drive through low zone and score roller 3
-		driveViaIMU(-1, 270);
+		// drive through low zone evadining pole and barrier
+		driveViaIMU(-.5, 270);
 		turnViaIMU(360);
+		// get baseline distance from wall
+		distTarget = lsd.get();
+		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
+			distTarget = lsd.get();
+			pros::delay(5);
+		}
+		// gun it into wall using sensor to avoid pole and barrier
+		double start = pros::millis();
+		while (pros::millis() - start < 5000){
+			dist = getLSD(distTarget - 500, distTarget + 500); // filter to reasonable values
+			if(dist < distTarget - 40){
+				while (dist < (lsdTarget - 40)){
+					mBRO.move_velocity(200);
+					mBRI.move_velocity(200);
+					mFRO.move_velocity(-200);
+					mFRI.move_velocity(-200);
+					mBLO.move_velocity(-200 * (.75 + mBROState));
+					mBLI.move_velocity(-200 * (.75 + mBROState));
+					mFLO.move_velocity(200 * (.75 + mBROState));
+					mFLI.move_velocity(200 * (.75 + mBROState));
+					dist = getLSD(distTarget - 500, distTarget + 500);
+					pros::delay(20);
+				}
+			} else if (dist > distTarget + 40){
+				while (dist > (distTarget + 40)){
+					mBRO.move_velocity(-200);
+					mBRI.move_velocity(-200);
+					mFRO.move_velocity(200);
+					mFRI.move_velocity(200);
+					mBLO.move_velocity(200 * (.75 + mBROState));
+					mBLI.move_velocity(200 * (.75 + mBROState));
+					mFLO.move_velocity(-200 * (.75 + mBROState));
+					mFLI.move_velocity(-200 * (.75 + mBROState));
+					dist = getLSD(distTarget - 500, distTarget + 500);
+					pros::delay(20);
+				}
+			} else{
+				mBRO.move_velocity(-200);
+				mBRI.move_velocity(-200);
+				mFRO.move_velocity(200);
+				mFRI.move_velocity(200);
+				mBLO.move_velocity(200 * (.75 + mBROState));
+				mBLI.move_velocity(200 * (.75 + mBROState));
+				mFLO.move_velocity(-200 * (.75 + mBROState));
+				mFLI.move_velocity(-200 * (.75 + mBROState));
+			}
+		}
+		mBRO.move_velocity(0);
+		mBRI.move_velocity(0);
+		mFRO.move_velocity(0);
+		mFRI.move_velocity(0);
+		mBLO.move_velocity(0);
+		mBLI.move_velocity(0);
+		mFLO.move_velocity(0);
+		mFLI.move_velocity(0);
+
 		//driveViaTime(4000, true, 200);
 		imu.tare();
-		driveViaIMU(-.1, 0);
+		driveViaIMU(-.4, 0);
 		turnViaIMU(90);
-		driveViaIMU(3, 90);
+		driveViaIMU(10, 90);
+		/*
 		//strafeViaIMU(2, 90);
 		driveViaIMU(4.5, 90);
 		turnViaIMU(0);
