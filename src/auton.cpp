@@ -107,6 +107,7 @@ void autonomous(){
 	}	
 
 	if(auton == 'A'){
+		/*
 		//Score match loads
 		double distTarget = lsd.get();
 		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
@@ -199,7 +200,6 @@ void autonomous(){
 		driveViaIMU(-.4, 0);
 		turnViaIMU(90);
 		driveViaIMU(10, 90);
-		/*
 		//strafeViaIMU(2, 90);
 		driveViaIMU(4.5, 90);
 		turnViaIMU(0);
@@ -379,8 +379,7 @@ void autonomous(){
 	}
 	if(auton == 'T'){
 		while(true){
-			double dist = lsd.get();
-			std::cout << dist << std::endl;
+			logData();
 			pros::delay(1000);
 		}
 	}

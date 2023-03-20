@@ -26,7 +26,8 @@
 #define GPS_OFFSET_Y 0
 
 #define STD 10 // The standard task delay
-#define VISION_PRECISION 10
+
+int VISION_PRECISION = 10;
 
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;

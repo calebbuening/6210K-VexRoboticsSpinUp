@@ -5,6 +5,7 @@
 #define _GLOBALS_H_
 
 // Variables
+extern int VISION_PRECISION;
 extern double startTime;
 extern bool fiveSecondWarningTriggered;
 extern bool stringReleased;
@@ -42,6 +43,7 @@ extern pros::Motor mCATA;
 extern pros::IMU imu;
 extern pros::GPS gps;
 extern pros::Distance lsd;
+extern pros::Vision vision;
 
 extern void reloadCatapult();
 
