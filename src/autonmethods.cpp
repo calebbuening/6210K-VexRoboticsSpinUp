@@ -295,18 +295,19 @@ void matchLoadDisks(double lsdTarget){
 	 * 6. Arc towards the goal
 	 * 7. Repeat steps 1-6
 	*/
-	pros::delay(1000);
+	
+	pros::delay(800);
 	driveViaIMU(.5, 0);
 	turnViaIMU(90);
 	driveViaIMU(.54, 90);
-	pros::delay(700);
+	// pros::delay(700); // uncomment if not working
 	catapultRelease.set_value(true);
 	catapultState = true;
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	driveViaIMU(-2.5, 90);
+	driveViaIMU(-2.2, 90);
 	turnViaIMU(0);
 	driveViaIMU(-.4, 0);
-	driveViaTime(500, -100);
+	driveViaTime(200, -100);
 	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
 	if (dist < (lsdTarget - 40)){
 		while (dist < (lsdTarget - 40)){
@@ -337,5 +338,6 @@ void matchLoadDisks(double lsdTarget){
 		}
 	}
 	driveViaTime(200, -100);
+	// TODO: Add code that turns brain screen green when in position to accept disks
 
 }

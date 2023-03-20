@@ -117,11 +117,13 @@ void autonomous(){
 			matchLoadDisks(distTarget);
 		}
 		// Third shot
-		pros::delay(1000);
+		// screen green
+		pros::delay(800);
+		// screen normal
 		driveViaIMU(.5, 0);
 		turnViaIMU(90);
 		driveViaIMU(.54, 90);
-		pros::delay(700);
+		//pros::delay(700); //uncomment if it isn't working, this is delay for shot
 		catapultRelease.set_value(true);
 		catapultState = true;
 		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
@@ -131,91 +133,79 @@ void autonomous(){
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 2
-		driveViaIMU(-2.5, 180);
+		driveViaIMU(-2.2, 180);
 		turnViaIMU(270);
 		driveViaIMU(1, 270);
 		eliScoreRoller();
-		// drive through low zone evadining pole and barrier
+		// drive across field to other loader
 		driveViaIMU(-.5, 270);
-		turnViaIMU(360);
-		// get baseline distance from wall
-		distTarget = lsd.get();
-		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
-			distTarget = lsd.get();
-			pros::delay(5);
+		turnViaIMU(225);
+		driveViaIMU(-10, 225);
+		turnViaIMU(180);
+		driveViaTime(2000, -200)
+		//strafe align with loader and get baseline dist
+		dist = lsd.get();
+		while (0 > dist || dist >= 5200) {
+			dist = lsd.get();
+			pros::delay(10);
 		}
-		// gun it into wall using sensor to avoid pole and barrier
-		double start = pros::millis();
-		while (pros::millis() - start < 5000){
-			dist = getLSD(distTarget - 500, distTarget + 500); // filter to reasonable values
-			if(dist < distTarget - 40){
-				while (dist < (lsdTarget - 40)){
-					mBRO.move_velocity(200);
-					mBRI.move_velocity(200);
-					mFRO.move_velocity(-200);
-					mFRI.move_velocity(-200);
-					mBLO.move_velocity(-200 * (.75 + mBROState));
-					mBLI.move_velocity(-200 * (.75 + mBROState));
-					mFLO.move_velocity(200 * (.75 + mBROState));
-					mFLI.move_velocity(200 * (.75 + mBROState));
-					dist = getLSD(distTarget - 500, distTarget + 500);
-					pros::delay(20);
-				}
-			} else if (dist > distTarget + 40){
-				while (dist > (distTarget + 40)){
-					mBRO.move_velocity(-200);
-					mBRI.move_velocity(-200);
-					mFRO.move_velocity(200);
-					mFRI.move_velocity(200);
-					mBLO.move_velocity(200 * (.75 + mBROState));
-					mBLI.move_velocity(200 * (.75 + mBROState));
-					mFLO.move_velocity(-200 * (.75 + mBROState));
-					mFLI.move_velocity(-200 * (.75 + mBROState));
-					dist = getLSD(distTarget - 500, distTarget + 500);
-					pros::delay(20);
-				}
-			} else{
-				mBRO.move_velocity(-200);
-				mBRI.move_velocity(-200);
-				mFRO.move_velocity(200);
-				mFRI.move_velocity(200);
-				mBLO.move_velocity(200 * (.75 + mBROState));
-				mBLI.move_velocity(200 * (.75 + mBROState));
-				mFLO.move_velocity(-200 * (.75 + mBROState));
-				mFLI.move_velocity(-200 * (.75 + mBROState));
+		distTarget = getLSD(dist - 500, dist + 500);
+		if (dist < (distTarget - 40)){
+			while (dist < (distTarget - 40)){
+				mBRO.move_velocity(50);
+				mBRI.move_velocity(50);
+				mFRO.move_velocity(-50);
+				mFRI.move_velocity(-50);
+				mBLO.move_velocity(-50);
+				mBLI.move_velocity(-50);
+				mFLO.move_velocity(50);
+				mFLI.move_velocity(50);
+				dist = lsd.get();
+				pros::delay(10);
 			}
 		}
-		mBRO.move_velocity(0);
-		mBRI.move_velocity(0);
-		mFRO.move_velocity(0);
-		mFRI.move_velocity(0);
-		mBLO.move_velocity(0);
-		mBLI.move_velocity(0);
-		mFLO.move_velocity(0);
-		mFLI.move_velocity(0);
+		if (dist > (distTarget + 40)){
+			while (dist > (distTarget + 40)){ //strafe right
+				mBRO.move_velocity(-50);
+				mBRI.move_velocity(-50);
+				mFRO.move_velocity(50);
+				mFRI.move_velocity(50);
+				mBLO.move_velocity(50 * (.75 + mBROState));
+				mBLI.move_velocity(50 * (.75 + mBROState));
+				mFLO.move_velocity(-50 * (.75 + mBROState));
+				mFLI.move_velocity(-50 * (.75 + mBROState));
+				dist = lsd.get();
+				pros::delay(10);
+			}
+		}
+		driveViaTime(200, -100);
 
-		//driveViaTime(4000, true, 200);
 		imu.tare();
-		driveViaIMU(-.4, 0);
+		matchLoadDisks(distTarget);
+
+		// Second shot
+		pros::delay(1000);
+		driveViaIMU(.5, 0);
 		turnViaIMU(90);
-		driveViaIMU(10, 90);
-		/*
-		//strafeViaIMU(2, 90);
-		driveViaIMU(4.5, 90);
-		turnViaIMU(0);
+		driveViaIMU(.54, 90);
+		//pros::delay(700);
+		catapultRelease.set_value(true);
+		catapultState = true;
+		// next line is almighty omega jank
+		pros::Task taskReloadCatapult_2(reloadCatapult, "Reload Catapult");
+
+		//turn and drive to face roller, score
+		driveViaIMU(-8, 90);
+		turnViaIMU(180);
 		eliScoreRoller();
-		//score roller 4
-		driveViaIMU(-1.5, 0);
-		turnViaIMU(90);
-		driveViaIMU(.5, 90);
+		// drive and score roller 4
+		driveViaIMU(-2.2, 180);
+		turnViaIMU(270);
+		driveViaIMU(1, 270);
 		eliScoreRoller();
-		// fire endgame
-		driveViaIMU(-1.5, 90);
-		turnViaIMU(45);
-		stringRelease.set_value(true);
-		driveViaIMU(1, 45);
-		driveViaIMU(-.6, 45);
-		*/
+		// Line up for endgame
+		driveViaIMU(-1, 270);
+		turnViaIMU(225);
 	}
 
 	if(auton == 'L'){
