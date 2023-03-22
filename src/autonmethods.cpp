@@ -368,13 +368,13 @@ void logData(){
 	pros::vision_object_s_t objects[VISION_PRECISION]; // this is precision, change as needed
 	vision.read_by_size(0, VISION_PRECISION, objects);
 	for (int i=0; i <= VISION_PRECISION; i++){
-		std::cout << objects[i].signature << "," << objects[i].x_middle_coord << "," << objects[i].y_middle_coord << "," << objects[i].width << "," << objects[i].height << ",";
+		std::cout << objects[i].signature << ";" << objects[i].x_middle_coord << ";" << objects[i].y_middle_coord << ";" << objects[i].width << ";" << objects[i].height << ";";
 	}
 	std::cout << lsd.get() << std::endl;
 	/*std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
 	for (i=0, i <= VISION_PRECISION, i++){
-		dataFile << objects[i] << ":";
+		dataFile << objects[i] << ";";
 	}
 	dataFile << lsd.get() << std::endl;	*/
 }
