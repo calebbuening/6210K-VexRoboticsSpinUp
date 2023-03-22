@@ -374,4 +374,20 @@ void autonomous(){
 			pros::delay(1000);
 		}
 	}
+
+	if(auton == 'E'){
+		static lv_style_t white_style;
+		lv_style_copy(&white_style, &lv_style_plain);
+		white_style.body.main_color = LV_COLOR_WHITE;
+		white_style.body.grad_color = LV_COLOR_WHITE;
+
+		static lv_style_t black_style;
+		lv_style_copy(&black_style, &lv_style_plain);
+		black_style.body.main_color = LV_COLOR_BLACK;
+		black_style.body.grad_color = LV_COLOR_BLACK;
+
+		lv_obj_set_style(lv_scr_act(), &white_style);
+		pros::delay(1000);
+		lv_obj_set_style(lv_scr_act(), &black_style);
+	}
 }

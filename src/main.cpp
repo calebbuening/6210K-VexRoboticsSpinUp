@@ -102,8 +102,8 @@ void opcontrol() {
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 6) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 6;
+			if(selectionIndex > 7) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 7;
 
 			// Print selected auton
 			switch(selectionIndex){
@@ -114,6 +114,7 @@ void opcontrol() {
 				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
 				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
 				case 6: master.print(1, 0, "       Testing      "); auton = 'T'; break;
+				case 7: master.print(1, 0, "     Experimental   "); auton = 'E'; break;
 				default: master.print(1, 0,"ERROR: Invalid auton"); break;
 			}
 
