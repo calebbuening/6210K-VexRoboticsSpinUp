@@ -4,6 +4,7 @@ The amazing code repo for all the PROS code of 2022-2023.
 ### Authors:
 * Caleb Buening
 * Joey Curnutt
+* Eli DeKruyter?
 * With Stephen Moore as a mentor
 
 ### A brief description of each folder/file
