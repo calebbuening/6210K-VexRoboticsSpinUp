@@ -10,7 +10,7 @@ void autonomous(){
 		int autonAdjust = 1;
 		if(auton=='Z'){
 			autonAdjust = -1;
-			driveViaIMU(3.2, 0);
+			driveViaIMU(3.2, 0, 200);
 			turnViaIMU(90);
 		}
 		imu.tare();
@@ -93,7 +93,7 @@ void autonomous(){
 		turnViaIMU(45 * autonAdjust);
 
 		// Back up 8 feet
-		driveViaIMU(-7.4, 45 * autonAdjust);
+		driveViaIMU(-7.4, 45 * autonAdjust, 200);
 
 		// Turn towards the goal
 		turnViaIMU(143 * autonAdjust); // was 141.5
@@ -117,39 +117,38 @@ void autonomous(){
 			matchLoadDisks(distTarget);
 		}
 		// Third shot
-		// screen green
+		pros::Task taskChangeColor(changeColor, "Change Color");
 		pros::delay(800);
 		// screen normal
-		driveViaIMU(.5, 0);
+		driveViaIMU(.5, 0, 200);
 		turnViaIMU(90);
-		driveViaIMU(.54, 90);
-		//pros::delay(700); //uncomment if it isn't working, this is delay for shot
+		driveViaIMU(.54, 90, 200);
+		pros::delay(300); //uncomment if it isn't working, this is delay for shot
 		catapultRelease.set_value(true);
 		catapultState = true;
 		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 
 		//turn and drive to face roller, score
-		driveViaIMU(-8, 90);
+		driveViaIMU(-7.5, 90, 600);
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 2
-		driveViaIMU(-2.2, 180);
+		driveViaIMU(-2.2, 180, 200);
 		turnViaIMU(270);
-		driveViaIMU(1, 270);
+		driveViaIMU(1, 270, 200);
 		eliScoreRoller();
 		// drive across field to other loader
-		driveViaIMU(-.5, 270);
+		driveViaIMU(-.5, 270, 200);
 		turnViaIMU(225);
-		driveViaIMU(-10, 225);
+		driveViaIMU(-10, 225, 600);
 		turnViaIMU(180);
-		driveViaTime(2000, -200)
+		driveViaTime(1000, -600);
 		//strafe align with loader and get baseline dist
-		dist = lsd.get();
+		double dist = lsd.get();
 		while (0 > dist || dist >= 5200) {
 			dist = lsd.get();
 			pros::delay(10);
 		}
-		distTarget = getLSD(dist - 500, dist + 500);
 		if (dist < (distTarget - 40)){
 			while (dist < (distTarget - 40)){
 				mBRO.move_velocity(50);
@@ -184,27 +183,28 @@ void autonomous(){
 		matchLoadDisks(distTarget);
 
 		// Second shot
-		pros::delay(1000);
-		driveViaIMU(.5, 0);
+		pros::Task taskChangeColor_2(changeColor, "Change Color");
+		pros::delay(800);
+		driveViaIMU(.5, 0, 200);
 		turnViaIMU(90);
-		driveViaIMU(.54, 90);
-		//pros::delay(700);
+		driveViaIMU(.54, 90, 200);
+		pros::delay(300);
 		catapultRelease.set_value(true);
 		catapultState = true;
 		// next line is almighty omega jank
 		pros::Task taskReloadCatapult_2(reloadCatapult, "Reload Catapult");
 
 		//turn and drive to face roller, score
-		driveViaIMU(-8, 90);
+		driveViaIMU(-7.5, 90, 600);
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 4
-		driveViaIMU(-2.2, 180);
+		driveViaIMU(-2.2, 180, 200);
 		turnViaIMU(270);
-		driveViaIMU(1, 270);
+		driveViaIMU(1, 270, 200);
 		eliScoreRoller();
 		// Line up for endgame
-		driveViaIMU(-1, 270);
+		driveViaIMU(-1, 270, 200);
 		turnViaIMU(225);
 	}
 
@@ -289,7 +289,7 @@ void autonomous(){
 
 	if(auton == 'R'){
 		int loop=0;
-		driveViaIMU(3, 0);
+		driveViaIMU(3, 0, 200);
 		turnViaIMU(90);
 		while(loop<2){
 
@@ -387,7 +387,7 @@ void autonomous(){
 		black_style.body.grad_color = LV_COLOR_BLACK;
 
 		lv_obj_set_style(lv_scr_act(), &white_style);
-		pros::delay(1000);
+		pros::delay(800);
 		lv_obj_set_style(lv_scr_act(), &black_style);
 	}
 }

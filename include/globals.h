@@ -17,6 +17,8 @@ extern bool catapultState;
 extern bool shieldReleased;
 extern bool stringLauncherAuto;
 extern bool shieldLauncherAuto;
+extern lv_style_t black_style;
+extern lv_style_t white_style;
 
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
@@ -44,5 +46,6 @@ extern pros::GPS gps;
 extern pros::Distance lsd;
 
 extern void reloadCatapult();
+extern void changeColor();
 
 #endif // _GLOBALS_H_

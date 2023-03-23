@@ -130,7 +130,7 @@ void turnViaIMU(double heading){
 	mFLI.move_velocity(0);
 }
 
-void driveViaIMU(double dist, double heading){
+void driveViaIMU(double dist, double heading, double vel){
 	mBRI.tare_position();
 	mBLI.tare_position();
 	double pos = (mBRI.get_position() + mBLI.get_position())/2;
@@ -142,16 +142,16 @@ void driveViaIMU(double dist, double heading){
 			if(std::fabs(error) < 15){ // Was 30
 				rotation = (12 * error); // Was 6
 			}else{
-				rotation = 200 * sgn(error); // was 200
+				rotation = vel * sgn(error); // was 200
 			}
-			mBRO.move_velocity(200 - rotation);
-			mBRI.move_velocity(200 - rotation);
-			mFRO.move_velocity(200 - rotation);
-			mFRI.move_velocity(200 - rotation);
-			mBLO.move_velocity(200 + rotation);
-			mBLI.move_velocity(200 + rotation);
-			mFLO.move_velocity(200 + rotation);
-			mFLI.move_velocity(200 + rotation);
+			mBRO.move_velocity(vel - rotation);
+			mBRI.move_velocity(vel - rotation);
+			mFRO.move_velocity(vel - rotation);
+			mFRI.move_velocity(vel - rotation);
+			mBLO.move_velocity(vel + rotation * (.75 + mBROState));
+			mBLI.move_velocity(vel + rotation * (.75 + mBROState));
+			mFLO.move_velocity(vel + rotation * (.75 + mBROState));
+			mFLI.move_velocity(vel + rotation * (.75 + mBROState));
 			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
@@ -162,16 +162,16 @@ void driveViaIMU(double dist, double heading){
 			if(std::fabs(error) < 15){
 				rotation = (12 * error); // Was 6
 			}else{
-				rotation = 200 * sgn(error); // was 200
+				rotation = vel * sgn(error); // was 200
 			}
-			mBRO.move_velocity(-200 - rotation);
-			mBRI.move_velocity(-200 - rotation);
-			mFRO.move_velocity(-200 - rotation);
-			mFRI.move_velocity(-200 - rotation);
-			mBLO.move_velocity(-200 + rotation);
-			mBLI.move_velocity(-200 + rotation);
-			mFLO.move_velocity(-200 + rotation);
-			mFLI.move_velocity(-200 + rotation);
+			mBRO.move_velocity(-vel - rotation);
+			mBRI.move_velocity(-vel - rotation);
+			mFRO.move_velocity(-vel - rotation);
+			mFRI.move_velocity(-vel - rotation);
+			mBLO.move_velocity(-vel + rotation * (.75 + mBROState));
+			mBLI.move_velocity(-vel + rotation * (.75 + mBROState));
+			mFLO.move_velocity(-vel + rotation * (.75 + mBROState));
+			mFLI.move_velocity(-vel + rotation * (.75 + mBROState));
 			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
@@ -295,18 +295,18 @@ void matchLoadDisks(double lsdTarget){
 	 * 6. Arc towards the goal
 	 * 7. Repeat steps 1-6
 	*/
-	
+	pros::Task taskChangeColor(changeColor, "Change Color");
 	pros::delay(800);
-	driveViaIMU(.5, 0);
+	driveViaIMU(.5, 0, 200);
 	turnViaIMU(90);
-	driveViaIMU(.54, 90);
-	// pros::delay(700); // uncomment if not working
+	driveViaIMU(.54, 90, 200);
+	pros::delay(300); // uncomment if not working
 	catapultRelease.set_value(true);
 	catapultState = true;
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	driveViaIMU(-2.2, 90);
+	driveViaIMU(-2.2, 90, 200);
 	turnViaIMU(0);
-	driveViaIMU(-.4, 0);
+	driveViaIMU(-.4, 0, 200);
 	driveViaTime(200, -100);
 	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
 	if (dist < (lsdTarget - 40)){
