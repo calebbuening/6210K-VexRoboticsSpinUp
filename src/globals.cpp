@@ -38,6 +38,8 @@ bool catapultState = false;
 bool shieldReleased = false;
 bool stringLauncherAuto = true;
 bool shieldLauncherAuto = true;
+static lv_style_t black_style;
+static lv_style_t white_style;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
@@ -81,4 +83,19 @@ void reloadCatapult(){
 	while(mCATA.get_position() < 3.7) pros::Task::delay(STD);
 	mCATA = 0;
 	mCATA.brake();
+}
+
+void changeColor(){
+	lv_style_copy(&white_style, &lv_style_plain);
+	white_style.body.main_color = LV_COLOR_WHITE;
+	white_style.body.grad_color = LV_COLOR_WHITE;
+
+	
+	lv_style_copy(&black_style, &lv_style_plain);
+	black_style.body.main_color = LV_COLOR_BLACK;
+	black_style.body.grad_color = LV_COLOR_BLACK;
+
+	lv_obj_set_style(lv_scr_act(), &white_style);
+	pros::Task::delay(800);
+	lv_obj_set_style(lv_scr_act(), &black_style);
 }

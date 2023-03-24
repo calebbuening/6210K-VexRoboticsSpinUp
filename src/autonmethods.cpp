@@ -312,9 +312,9 @@ void matchLoadDisks(double lsdTarget){
 	 * 6. Arc towards the goal
 	 * 7. Repeat steps 1-6
 	*/
-	
+	pros::Task taskChangeColor(changeColor, "Change Color");
 	pros::delay(800);
-	driveViaIMU(.5, 0);
+	driveViaIMU(.5, 0, 200);
 	turnViaIMU(90);
 	driveViaIMU(1.9, 90); //.54
 	pros::delay(700); // uncomment if not working
@@ -323,7 +323,7 @@ void matchLoadDisks(double lsdTarget){
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 	driveViaIMU(-1.9, 90); //-2.2
 	turnViaIMU(0);
-	driveViaIMU(-.4, 0);
+	driveViaIMU(-.4, 0, 200);
 	driveViaTime(200, -100);
 	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
 	if (dist < (lsdTarget - 40)){
