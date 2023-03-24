@@ -130,7 +130,8 @@ void turnViaIMU(double heading){
 	mFLI.move_velocity(0);
 }
 
-void driveViaIMU(double dist, double heading){
+void driveViaIMU(double dist, double heading, double vel = 200){
+	vel = std::fabs(vel); // Make sure velocity is a magnitude, since direction is automatically determined
 	mBRI.tare_position();
 	mBLI.tare_position();
 	double pos = (mBRI.get_position() + mBLI.get_position())/2;
@@ -142,16 +143,16 @@ void driveViaIMU(double dist, double heading){
 			if(std::fabs(error) < 15){ // Was 30
 				rotation = (12 * error); // Was 6
 			}else{
-				rotation = 200 * sgn(error); // was 200
+				rotation = vel * sgn(error); // was 200
 			}
-			mBRO.move_velocity(200 - rotation);
-			mBRI.move_velocity(200 - rotation);
-			mFRO.move_velocity(200 - rotation);
-			mFRI.move_velocity(200 - rotation);
-			mBLO.move_velocity(200 + rotation);
-			mBLI.move_velocity(200 + rotation);
-			mFLO.move_velocity(200 + rotation);
-			mFLI.move_velocity(200 + rotation);
+			mBRO.move_velocity(vel - rotation);
+			mBRI.move_velocity(vel - rotation);
+			mFRO.move_velocity(vel - rotation);
+			mFRI.move_velocity(vel - rotation);
+			mBLO.move_velocity(vel + rotation);
+			mBLI.move_velocity(vel + rotation);
+			mFLO.move_velocity(vel + rotation);
+			mFLI.move_velocity(vel + rotation);
 			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
@@ -162,16 +163,16 @@ void driveViaIMU(double dist, double heading){
 			if(std::fabs(error) < 15){
 				rotation = (12 * error); // Was 6
 			}else{
-				rotation = 200 * sgn(error); // was 200
+				rotation = vel * sgn(error); // was 200
 			}
-			mBRO.move_velocity(-200 - rotation);
-			mBRI.move_velocity(-200 - rotation);
-			mFRO.move_velocity(-200 - rotation);
-			mFRI.move_velocity(-200 - rotation);
-			mBLO.move_velocity(-200 + rotation);
-			mBLI.move_velocity(-200 + rotation);
-			mFLO.move_velocity(-200 + rotation);
-			mFLI.move_velocity(-200 + rotation);
+			mBRO.move_velocity(-vel - rotation);
+			mBRI.move_velocity(-vel - rotation);
+			mFRO.move_velocity(-vel - rotation);
+			mFRI.move_velocity(-vel - rotation);
+			mBLO.move_velocity(-vel + rotation);
+			mBLI.move_velocity(-vel + rotation);
+			mFLO.move_velocity(-vel + rotation);
+			mFLI.move_velocity(-vel + rotation);
 			pos = (mBRI.get_position() + mBLI.get_position())/2;
 			pros::delay(5);
 		}
@@ -263,7 +264,7 @@ void driveViaTime(double time, double vel){
 	mFLI.move_velocity(0);
 }
 
-double getLSD(float rangeStart, float rangeStop){
+double getLSD(double rangeStart, double rangeStop){
 	double dist;
 	std::vector<double> values;
 
@@ -284,6 +285,22 @@ double getLSD(float rangeStart, float rangeStop){
 	return dist;
 }
 
+void flashScreen(){
+	static lv_style_t white_style;
+	lv_style_copy(&white_style, &lv_style_plain);
+	white_style.body.main_color = LV_COLOR_WHITE;
+	white_style.body.grad_color = LV_COLOR_WHITE;
+	
+	static lv_style_t black_style;
+	lv_style_copy(&black_style, &lv_style_plain);
+	black_style.body.main_color = LV_COLOR_BLACK;
+	black_style.body.grad_color = LV_COLOR_BLACK;
+
+	lv_obj_set_style(lv_scr_act(), &white_style);
+	pros::delay(1000);
+	lv_obj_set_style(lv_scr_act(), &black_style);
+}
+
 void matchLoadDisks(double lsdTarget){
 
 	/* Function order:
@@ -299,12 +316,12 @@ void matchLoadDisks(double lsdTarget){
 	pros::delay(800);
 	driveViaIMU(.5, 0);
 	turnViaIMU(90);
-	driveViaIMU(.54, 90);
-	// pros::delay(700); // uncomment if not working
+	driveViaIMU(1.9, 90); //.54
+	pros::delay(700); // uncomment if not working
 	catapultRelease.set_value(true);
 	catapultState = true;
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	driveViaIMU(-2.2, 90);
+	driveViaIMU(-1.9, 90); //-2.2
 	turnViaIMU(0);
 	driveViaIMU(-.4, 0);
 	driveViaTime(200, -100);
@@ -337,7 +354,9 @@ void matchLoadDisks(double lsdTarget){
 			pros::delay(10);
 		}
 	}
+
+	pros::Task taskFlashScreen(flashScreen, "Flash Screen");
+
 	driveViaTime(200, -100);
-	// TODO: Add code that turns brain screen green when in position to accept disks
 
 }

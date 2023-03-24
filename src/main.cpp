@@ -27,7 +27,17 @@ void opcontrol() {
     lv_obj_align(label1, NULL, LV_ALIGN_CENTER, 0, 0);
 
 	if(!initialized){
-		
+
+		// Wheels also hold
+		mBRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
 		// Calibrate the IMU
 		master.print(0, 0, "Calibrating IMU...");
 		pros::delay(60);

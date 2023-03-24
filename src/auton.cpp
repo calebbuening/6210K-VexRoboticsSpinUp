@@ -107,6 +107,7 @@ void autonomous(){
 	}	
 
 	if(auton == 'A'){
+		pros::Task taskFlashScreen(flashScreen, "Flash Screen");
 		//Score match loads
 		double distTarget = lsd.get();
 		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
@@ -117,19 +118,17 @@ void autonomous(){
 			matchLoadDisks(distTarget);
 		}
 		// Third shot
-		// screen green
 		pros::delay(800);
-		// screen normal
 		driveViaIMU(.5, 0);
 		turnViaIMU(90);
-		driveViaIMU(.54, 90);
-		//pros::delay(700); //uncomment if it isn't working, this is delay for shot
+		driveViaIMU(1.8, 90); // 1.4
+		pros::delay(700); //uncomment if it isn't working, this is delay for shot
 		catapultRelease.set_value(true);
 		catapultState = true;
 		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 
 		//turn and drive to face roller, score
-		driveViaIMU(-8, 90);
+		driveViaIMU(-7.5, 90);
 		turnViaIMU(180);
 		eliScoreRoller();
 		// drive and score roller 2
@@ -140,11 +139,11 @@ void autonomous(){
 		// drive across field to other loader
 		driveViaIMU(-.5, 270);
 		turnViaIMU(225);
-		driveViaIMU(-10, 225);
+		driveViaIMU(-11, 225, 600);
 		turnViaIMU(180);
-		driveViaTime(2000, -200)
+		driveViaTime(1000, -600);
 		//strafe align with loader and get baseline dist
-		dist = lsd.get();
+		double dist = lsd.get();
 		while (0 > dist || dist >= 5200) {
 			dist = lsd.get();
 			pros::delay(10);
@@ -180,6 +179,8 @@ void autonomous(){
 		}
 		driveViaTime(200, -100);
 
+		pros::Task taskFlashScreen2(flashScreen, "Flash Screen");
+
 		imu.tare();
 		matchLoadDisks(distTarget);
 
@@ -187,7 +188,7 @@ void autonomous(){
 		pros::delay(1000);
 		driveViaIMU(.5, 0);
 		turnViaIMU(90);
-		driveViaIMU(.54, 90);
+		driveViaIMU(1.9, 90);
 		//pros::delay(700);
 		catapultRelease.set_value(true);
 		catapultState = true;
@@ -376,18 +377,6 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
-		static lv_style_t white_style;
-		lv_style_copy(&white_style, &lv_style_plain);
-		white_style.body.main_color = LV_COLOR_WHITE;
-		white_style.body.grad_color = LV_COLOR_WHITE;
-
-		static lv_style_t black_style;
-		lv_style_copy(&black_style, &lv_style_plain);
-		black_style.body.main_color = LV_COLOR_BLACK;
-		black_style.body.grad_color = LV_COLOR_BLACK;
-
-		lv_obj_set_style(lv_scr_act(), &white_style);
-		pros::delay(1000);
-		lv_obj_set_style(lv_scr_act(), &black_style);
+		driveViaIMU(2, 0);
 	}
 }
