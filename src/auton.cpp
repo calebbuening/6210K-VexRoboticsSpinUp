@@ -2,7 +2,20 @@
 #include "globals.h"
 #include "autonmethods.h"
 
+#define STD 10 // The standard task delay
+
+void tension(){
+	// Tension the catapult
+	mCATA = 127;
+	while(mCATA.get_position() < 3.7) pros::Task::delay(STD);
+	mCATA = 0;
+	mCATA.brake();
+}
+
 void autonomous(){
+
+	// TO PREVENT INSANE LEVELS OF DRIFT FROM SITTING AROUND
+	imu.tare();
 
 	// THE LEAGUE AUTON
 	if(auton == 'S' || auton == 'Z'){
@@ -13,7 +26,9 @@ void autonomous(){
 			driveViaIMU(3.2, 0, 200);
 			turnViaIMU(90);
 		}
-		imu.tare();
+
+		imu.tare(); // Call this zero so that everything else works, even though S and Z have different
+					// starting positions
 
 		int loop = 0;
 		while(loop < 2){
@@ -107,42 +122,65 @@ void autonomous(){
 	}	
 
 	if(auton == 'A'){
+
+		// Wheels also hold
+		mBRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mBLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+		// Flash the screen to indicate the start of the program
+		pros::Task taskTensionAgain(tension, "Retensioning...");
 		pros::Task taskFlashScreen(flashScreen, "Flash Screen");
-		//Score match loads
+
+		// Record the currect distance from the wall, to use when realigning
 		double distTarget = lsd.get();
-		while (distTarget < 1 || distTarget >= 5200){//filter to possible values
+		while (distTarget < 1 || distTarget >= 5200){//filter to reasonable values
 			distTarget = lsd.get();
 			pros::delay(5);
-		} 
+		}
+
+		// Score the previously loaded discs twice using the scoring loop
 		for(int i = 0; i <= 1; i++){
 			matchLoadDisks(distTarget);
 		}
-		// Third shot
+
+		// Manually take a third shot to avoid the latter part of the previously written loop
+		// NOTE: The following values should mirror the scoring loop
 		pros::delay(800);
-		driveViaIMU(.5, 0);
+		driveViaIMU(.75, 0); //.5
 		turnViaIMU(90);
-		driveViaIMU(1.8, 90); // 1.4
-		pros::delay(700); //uncomment if it isn't working, this is delay for shot
+		driveViaIMU(2.1, 90); // 1.9
+		pros::delay(200); //uncomment if it isn't working, this is delay for shot
 		catapultRelease.set_value(true);
 		catapultState = true;
 		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 
-		//turn and drive to face roller, score
-		driveViaIMU(-7.5, 90);
+		// Turn and drive to face roller, the score
+		driveViaIMU(-7.7, 90); // -7.5
 		turnViaIMU(180);
 		eliScoreRoller();
+
 		// drive and score roller 2
-		driveViaIMU(-2.2, 180, 200);
+		driveViaIMU(-2.5, 180, 200); //was2.5
 		turnViaIMU(270);
-		driveViaIMU(1, 270, 200);
+		driveViaIMU(1.2, 270, 300); //1.0
 		eliScoreRoller();
+
 		// drive across field to other loader
 		driveViaIMU(-.5, 270, 200);
-		turnViaIMU(225);
-		driveViaIMU(-11, 225, 600);
+		turnViaIMU(220); // was 225, same below
+		driveViaIMU(-17, 220, 600); //12
+		driveViaIMU(1, 220, 500);
 		turnViaIMU(180);
-		driveViaTime(1000, -600);
-		//strafe align with loader and get baseline dist
+		driveViaIMU(-1, 180, 300); // Added this to keep it straight over the discs
+		driveViaTime(1000, -500); //1000was200 Bang up against the wall to realign ourself
+
+		// Use the distance sensor to align with the loading area
 		double dist = lsd.get();
 		while (0 > dist || dist >= 5200) {
 			dist = lsd.get();
@@ -150,63 +188,90 @@ void autonomous(){
 		}
 		if (dist < (distTarget - 40)){
 			while (dist < (distTarget - 40)){
-				mBRO.move_velocity(50);
-				mBRI.move_velocity(50);
-				mFRO.move_velocity(-50);
-				mFRI.move_velocity(-50);
-				mBLO.move_velocity(-50);
-				mBLI.move_velocity(-50);
-				mFLO.move_velocity(50);
-				mFLI.move_velocity(50);
+				mBRO.move_velocity(200);
+				mBRI.move_velocity(200);
+				mFRO.move_velocity(-200);
+				mFRI.move_velocity(-200);
+				mBLO.move_velocity(-200); //adjust for motor
+				mBLI.move_velocity(-200);
+				mFLO.move_velocity(200);
+				mFLI.move_velocity(200);
+
 				dist = lsd.get();
 				pros::delay(10);
 			}
 		}
 		if (dist > (distTarget + 40)){
 			while (dist > (distTarget + 40)){ //strafe right
-				mBRO.move_velocity(-50);
-				mBRI.move_velocity(-50);
-				mFRO.move_velocity(50);
-				mFRI.move_velocity(50);
-				mBLO.move_velocity(50 * (.75 + mBROState));
-				mBLI.move_velocity(50 * (.75 + mBROState));
-				mFLO.move_velocity(-50 * (.75 + mBROState));
-				mFLI.move_velocity(-50 * (.75 + mBROState));
+			 	mBRO.move_velocity(-200);
+				mBRI.move_velocity(-200);
+				mFRO.move_velocity(200);
+				mFRI.move_velocity(200);
+				mBLO.move_velocity(200);
+				mBLI.move_velocity(200);
+				mFLO.move_velocity(-200);
+				mFLI.move_velocity(-200);
 				dist = lsd.get();
 				pros::delay(10);
 			}
 		}
-		driveViaTime(200, -100);
 
+		// Alert for loading and press up against the wall whilst loading again
 		pros::Task taskFlashScreen2(flashScreen, "Flash Screen");
+		driveViaTime(200, -400);
 
+
+		// Zero the imu to make everything from here on out a lot easier
 		imu.tare();
+
+		// Take a shot
 		matchLoadDisks(distTarget);
 
-		// Second shot
-		pros::Task taskChangeColor_2(changeColor, "Change Color");
+		// Load the preload again
 		pros::delay(800);
-		driveViaIMU(.5, 0, 200);
+
+		// Take a second shot
+		// NOTE: This should also mirror the scoring loop
+		driveViaIMU(.75, 0, 200); //.5
 		turnViaIMU(90);
-		driveViaIMU(1.9, 90);
-		//pros::delay(700);
+		driveViaIMU(2.1, 90);
+		pros::delay(200);
+
 		catapultRelease.set_value(true);
 		catapultState = true;
-		// next line is almighty omega jank
-		pros::Task taskReloadCatapult_2(reloadCatapult, "Reload Catapult");
 
-		//turn and drive to face roller, score
-		driveViaIMU(-7.5, 90, 600);
+		// Reload the catapult again because idk why
+		pros::Task taskReloadCatapult2(reloadCatapult, "Reload Catapult");
+
+		// TODO: Check and see how much this mirrors the original
+		// Turn and drive to face roller, score
+		driveViaIMU(-7.9, 90, 400); //-7.5
 		turnViaIMU(180);
 		eliScoreRoller();
+
 		// drive and score roller 4
-		driveViaIMU(-2.2, 180, 200);
+		driveViaIMU(-2.5, 180, 200); //was2.5
 		turnViaIMU(270);
-		driveViaIMU(1, 270, 200);
+		driveViaIMU(1.2, 270, 300); //1.0
+		driveViaTime(1000, 400);
 		eliScoreRoller();
+
 		// Line up for endgame
 		driveViaIMU(-1, 270, 200);
 		turnViaIMU(225);
+
+		// Endgame
+		stringRelease.set_value(true);
+
+		// Wheels also hold
+		mBRO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mBRI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mFRO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mFRI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mBLO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mBLI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mFLO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 	}
 
 	if(auton == 'L'){

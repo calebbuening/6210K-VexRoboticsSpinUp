@@ -3,7 +3,7 @@
 
 void eliScoreRoller(){
 	int loop=0;
-		while(loop<2){
+		while(loop<1){
 
 			// Rear Right
 			mBRO = 50;
@@ -59,7 +59,7 @@ void eliScoreRoller(){
 			// Rear Right
 			mFLO = 0;
 			mFLI = 0;
-			pros::delay(500);
+			//pros::delay(500);
 
 			loop=loop+1;
 		}
@@ -76,8 +76,6 @@ void eliScoreRoller(){
 		// Rear Right
 		mFLO = 0;
 		mFLI = 0;
-
-		pros::delay(500);
 }
 
 // Returns -1, 0, and 1 based on number direction
@@ -94,7 +92,7 @@ void turnViaIMU(double heading){
 	while(std::fabs(error) > .5)
 	{
 		if(std::fabs(error) < 30){
-			rotation = -(6 * error); // Was 6
+			rotation = -(9 * error); // Was 6
 		}else{
 			rotation = -200 * sgn(error); // was 200
 		}
@@ -312,19 +310,28 @@ void matchLoadDisks(double lsdTarget){
 	 * 6. Arc towards the goal
 	 * 7. Repeat steps 1-6
 	*/
-	pros::Task taskChangeColor(changeColor, "Change Color");
+
+	// Provide a short wait time for loading
 	pros::delay(800);
-	driveViaIMU(.5, 0, 200);
+
+	// Drive to the shooting location
+	driveViaIMU(.75, 0, 200); //.5
 	turnViaIMU(90);
-	driveViaIMU(1.9, 90); //.54
-	pros::delay(700); // uncomment if not working
+	driveViaIMU(2.1, 90); //1.9
+	pros::delay(200); // come to rest
+
+	// Fire and begin reloading
 	catapultRelease.set_value(true);
 	catapultState = true;
 	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-	driveViaIMU(-1.9, 90); //-2.2
+
+	// Get back to the loading area
+	driveViaIMU(-2.1, 90); //-1.9
 	turnViaIMU(0);
-	driveViaIMU(-.4, 0, 200);
-	driveViaTime(200, -100);
+	driveViaIMU(-.45, 0, 200); //-.2
+
+	// Press up against the wall and align using the provided distance sensor target
+	driveViaTime(500, -400);
 	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
 	if (dist < (lsdTarget - 40)){
 		while (dist < (lsdTarget - 40)){
@@ -355,8 +362,8 @@ void matchLoadDisks(double lsdTarget){
 		}
 	}
 
+	// Flash the screen to show we are ready to load while we press up against the side of the field
 	pros::Task taskFlashScreen(flashScreen, "Flash Screen");
-
 	driveViaTime(200, -100);
 
 }

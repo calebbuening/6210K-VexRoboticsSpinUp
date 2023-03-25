@@ -18,7 +18,7 @@
 #define SHIELD 'G'
 
 
-#define GYRO 12
+#define GYRO 13
 #define LSD 5
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
