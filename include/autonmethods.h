@@ -1,4 +1,7 @@
 #include "main.h"
+
+#ifndef _AUTONMETHODS_H_
+#define _AUTONMETHODS_H_
 extern void eliScoreRoller();
 
 // Returns -1, 0, and 1 based on number direction
@@ -14,3 +17,5 @@ extern void matchLoadDisks(double lsdTarget);
 extern void driveViaTime(double time, double vel);
 extern double getLSD(double rangeStart, double rangeStop);
 extern void flashScreen();
+
+#endif

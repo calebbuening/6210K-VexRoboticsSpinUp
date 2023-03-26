@@ -1,6 +1,7 @@
 #include "main.h"
 #include "globals.h"
 #include "auton.h"
+#include "autonmethods.h"
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -146,6 +147,10 @@ void opcontrol() {
 
 	while (true) {
 
+		if(master.get_digital_new_press(DIGITAL_DOWN)){
+			autonomous();
+		}
+
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
 			catapultRelease.set_value(true);
@@ -260,6 +265,16 @@ void opcontrol() {
 				masterDash = true;
 			}
 		}
+		if(partner.get_digital_new_press(DIGITAL_R2)){
+			highReleaseAuto = !highReleaseAuto;
+			if(highReleaseAuto){
+				partnerDot = true;
+				masterDot = true;
+			}else{
+				partnerDash = true;
+				masterDash = true;
+			}
+		}
 		
 		// Timing delays to avoid controller communication errors
 		if(loopCounter % 15 == 0){
@@ -268,7 +283,7 @@ void opcontrol() {
 		}
 		if(loopCounter % 15 == 3){
 			// Print line 2
-			partner.print(1, 0, "Str: %d", stringLauncherAuto);
+			partner.print(1, 0, "Str: %d  Hgh: %d", stringLauncherAuto, highReleaseAuto);
 		}
 		if(loopCounter % 15 == 6){
 			// Print line 3
@@ -322,6 +337,18 @@ void opcontrol() {
 					shieldRelease.set_value(true);
 				}
 
+				//Auto high blocker
+				if(highReleaseAuto && !highReleased && pros::millis() - startTime > 95000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
+				// Manual High blocker
+				if(master.get_digital_new_press(DIGITAL_LEFT) && !highReleased && pros::millis() - startTime > 95000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
 				// 5 second warning for endgame stuff
 				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
 					fiveSecondWarningTriggered = true;
@@ -352,6 +379,18 @@ void opcontrol() {
 					shieldRelease.set_value(true);
 				}
 
+				//Auto high blocker
+				if(highReleaseAuto && !highReleased && pros::millis() - startTime > 57000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
+				// Manual high blocker
+				if(master.get_digital_new_press(DIGITAL_LEFT) && !shieldReleased && pros::millis() - startTime > 50000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
 				// 5 second warning for endgame stuff
 				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 55000){
 					fiveSecondWarningTriggered = true;
@@ -374,6 +413,12 @@ void opcontrol() {
 			if(!shieldReleased && master.get_digital_new_press(DIGITAL_UP)){
 					shieldReleased = true;
 					shieldRelease.set_value(true);
+			}
+
+			// Manual High launcher
+			if(!highReleased && master.get_digital_new_press(DIGITAL_LEFT)){
+				highReleased = true;
+				highRelease.set_value(true);
 			}
 		}
 

@@ -222,7 +222,7 @@ void autonomous(){
 
 
 		// Zero the imu to make everything from here on out a lot easier
-		imu.tare();
+		imu.set_rotation(imu.get_rotation()-180);
 
 		// Take a shot
 		matchLoadDisks(distTarget);

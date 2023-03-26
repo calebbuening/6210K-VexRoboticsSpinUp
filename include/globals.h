@@ -15,8 +15,10 @@ extern bool mBROState;
 extern bool initialized;
 extern bool catapultState;
 extern bool shieldReleased;
+extern bool highReleased;
 extern bool stringLauncherAuto;
 extern bool shieldLauncherAuto;
+extern bool highReleaseAuto;
 extern lv_style_t black_style;
 extern lv_style_t white_style;
 
@@ -24,6 +26,7 @@ extern lv_style_t white_style;
 extern pros::ADIDigitalOut stringRelease;
 extern pros::ADIDigitalOut catapultRelease;
 extern pros::ADIDigitalOut shieldRelease;
+extern pros::ADIDigitalOut highRelease;
 
 // Controllers
 extern pros::Controller master;

@@ -16,6 +16,7 @@
 #define STRING 'H'
 #define CATA 'A'
 #define SHIELD 'G'
+#define HIGH 'C'
 
 
 #define GYRO 13
@@ -36,8 +37,10 @@ bool mBROState = true;
 bool initialized = false;
 bool catapultState = false;
 bool shieldReleased = false;
+bool highReleased = false;
 bool stringLauncherAuto = true;
 bool shieldLauncherAuto = true;
+bool highReleaseAuto = true;
 static lv_style_t black_style;
 static lv_style_t white_style;
 
@@ -45,6 +48,7 @@ static lv_style_t white_style;
 pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
 pros::ADIDigitalOut shieldRelease(SHIELD);
+pros::ADIDigitalOut highRelease(HIGH);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
