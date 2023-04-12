@@ -1,6 +1,7 @@
 #include "main.h"
 #include "globals.h"
 #include "auton.h"
+#include "autonmethods.h"
 
 void initialize() {
 	// Make sure all pneumatics are in the off state
@@ -27,7 +28,7 @@ void opcontrol() {
     lv_obj_align(label1, NULL, LV_ALIGN_CENTER, 0, 0);
 
 	if(!initialized){
-		
+
 		// Calibrate the IMU
 		master.print(0, 0, "Calibrating IMU...");
 		pros::delay(60);
@@ -102,8 +103,8 @@ void opcontrol() {
 			// Adjust which auton program we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 6) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 6;
+			if(selectionIndex > 7) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 7;
 
 			// Print selected auton
 			switch(selectionIndex){
@@ -114,6 +115,7 @@ void opcontrol() {
 				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
 				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
 				case 6: master.print(1, 0, "       Testing      "); auton = 'T'; break;
+				case 7: master.print(1, 0, "     Experimental   "); auton = 'E'; break;
 				default: master.print(1, 0,"ERROR: Invalid auton"); break;
 			}
 
@@ -144,6 +146,10 @@ void opcontrol() {
 	bool partnerDash;
 
 	while (true) {
+
+		if(master.get_digital_new_press(DIGITAL_DOWN)){
+			autonomous();
+		}
 
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
@@ -259,6 +265,16 @@ void opcontrol() {
 				masterDash = true;
 			}
 		}
+		if(partner.get_digital_new_press(DIGITAL_R2)){
+			highReleaseAuto = !highReleaseAuto;
+			if(highReleaseAuto){
+				partnerDot = true;
+				masterDot = true;
+			}else{
+				partnerDash = true;
+				masterDash = true;
+			}
+		}
 		
 		// Timing delays to avoid controller communication errors
 		if(loopCounter % 15 == 0){
@@ -267,7 +283,7 @@ void opcontrol() {
 		}
 		if(loopCounter % 15 == 3){
 			// Print line 2
-			partner.print(1, 0, "Str: %d", stringLauncherAuto);
+			partner.print(1, 0, "Str: %d  Hgh: %d", stringLauncherAuto, highReleaseAuto);
 		}
 		if(loopCounter % 15 == 6){
 			// Print line 3
@@ -321,6 +337,18 @@ void opcontrol() {
 					shieldRelease.set_value(true);
 				}
 
+				//Auto high blocker
+				if(highReleaseAuto && !highReleased && pros::millis() - startTime > 95000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
+				// Manual High blocker
+				if(master.get_digital_new_press(DIGITAL_LEFT) && !highReleased && pros::millis() - startTime > 95000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
 				// 5 second warning for endgame stuff
 				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 100000){
 					fiveSecondWarningTriggered = true;
@@ -351,6 +379,18 @@ void opcontrol() {
 					shieldRelease.set_value(true);
 				}
 
+				//Auto high blocker
+				if(highReleaseAuto && !highReleased && pros::millis() - startTime > 57000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
+				// Manual high blocker
+				if(master.get_digital_new_press(DIGITAL_LEFT) && !shieldReleased && pros::millis() - startTime > 50000){
+					highReleased = true;
+					highRelease.set_value(true);
+				}
+
 				// 5 second warning for endgame stuff
 				if(!fiveSecondWarningTriggered && pros::millis() - startTime > 55000){
 					fiveSecondWarningTriggered = true;
@@ -373,6 +413,12 @@ void opcontrol() {
 			if(!shieldReleased && master.get_digital_new_press(DIGITAL_UP)){
 					shieldReleased = true;
 					shieldRelease.set_value(true);
+			}
+
+			// Manual High launcher
+			if(!highReleased && master.get_digital_new_press(DIGITAL_LEFT)){
+				highReleased = true;
+				highRelease.set_value(true);
 			}
 		}
 

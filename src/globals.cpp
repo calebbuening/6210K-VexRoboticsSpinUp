@@ -16,9 +16,10 @@
 #define STRING 'H'
 #define CATA 'A'
 #define SHIELD 'G'
+#define HIGH 'C'
 
 
-#define GYRO 12
+#define GYRO 13
 #define LSD 5
 #define VISION 14
 #define GPS_PORT 11
@@ -39,13 +40,18 @@ bool mBROState = true;
 bool initialized = false;
 bool catapultState = false;
 bool shieldReleased = false;
+bool highReleased = false;
 bool stringLauncherAuto = true;
 bool shieldLauncherAuto = true;
+bool highReleaseAuto = true;
+static lv_style_t black_style;
+static lv_style_t white_style;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
 pros::ADIDigitalOut shieldRelease(SHIELD);
+pros::ADIDigitalOut highRelease(HIGH);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -85,4 +91,19 @@ void reloadCatapult(){
 	while(mCATA.get_position() < 3.7) pros::Task::delay(STD);
 	mCATA = 0;
 	mCATA.brake();
+}
+
+void changeColor(){
+	lv_style_copy(&white_style, &lv_style_plain);
+	white_style.body.main_color = LV_COLOR_WHITE;
+	white_style.body.grad_color = LV_COLOR_WHITE;
+
+	
+	lv_style_copy(&black_style, &lv_style_plain);
+	black_style.body.main_color = LV_COLOR_BLACK;
+	black_style.body.grad_color = LV_COLOR_BLACK;
+
+	lv_obj_set_style(lv_scr_act(), &white_style);
+	pros::Task::delay(800);
+	lv_obj_set_style(lv_scr_act(), &black_style);
 }
