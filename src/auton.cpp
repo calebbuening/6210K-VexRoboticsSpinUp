@@ -449,7 +449,7 @@ void autonomous(){
 			}
 			giveInstruction();
 			updateLSDTime();
-			pros::delay(20)
+			pros::delay(20);
 
 		}
 	}

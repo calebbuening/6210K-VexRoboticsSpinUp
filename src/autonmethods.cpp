@@ -1,5 +1,6 @@
 #include "main.h"
 #include "globals.h"
+#include "python\model.h"
 
 void eliScoreRoller(){
 	int loop=0;
@@ -416,41 +417,43 @@ void logData(){
 }
 
 void updateLSDTime() {
-    if (lsd.get() < 5280 && occurance_counter < 3) {
+    if (lsd.get() < 5280 && count < 3) {
         // If the LSD just detected a value less than 5280, update the timeSinceLSD variable
-        occurance_counter ++;
+        count ++;
 		timeSinceLSD += 20;
-    } else if (lsd.get() < 5280 && occurance_counter >=3){
+    } else if (lsd.get() < 5280 && count >=3){
 		timeSinceLSD = 0;
-		occurance_counter = 0;
+		count = 0;
+	}
 	else{
 		timeSinceLSD += 20;
-	}
-
 	}
 }
 
 void giveInstruction(){
+	using keras2cpp::Model;
+	using keras2cpp::Tensor;
+
 	auto model = Model::load("/usd/auton_blocker.model");
 	if (count > 2){
 		count = 0;
 		// convert everything to floats so the tensor doesn't cry
-		float lsd = lsd.get();
-		float msd = msd.get();
-		float bsd = bsd.get();
+		float Lsd = lsd.get();
+		float Msd = msd.get();
+		float Bsd = bsd.get();
 		float time_since_lsd = timeSinceLSD;
 		// load model and create input tensor
 		model = Model::load("/usd/keras_ann.model");
 		Tensor in{1, 4};
-		in.data_[0] = lsd;
-		in.data_[1] = msd;
-		in.data_[2] = bsd;
+		in.data_[0] = Lsd;
+		in.data_[1] = Msd;
+		in.data_[2] = Bsd;
 		in.data_[3] = time_since_lsd;
 
 		// Run prediction
 		Tensor out = model(in);
-		float raw_result = out.data_[0];
-		speed = (raw_result * 127)/200;
+		double raw_result = out.data_[0];
+		double speed = (raw_result * 127)/200;
 		mBRO = speed;
 		mBRI = speed;
 		mFRO = speed;
@@ -460,7 +463,7 @@ void giveInstruction(){
 		mFLO = speed;
 		mFLI = speed;
 	
-		std::cout << result << std::endl;
+		std::cout << speed << std::endl;
 	} else{
 		count ++;
 	}

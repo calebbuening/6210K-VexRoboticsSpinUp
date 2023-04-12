@@ -120,7 +120,7 @@ void opcontrol() {
 			pros::delay(60);
 		}
 		master.clear();
-		vision.set_auto_white_balance(true);
+		
 		initialized = true;
 	}
 
