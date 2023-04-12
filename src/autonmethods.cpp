@@ -86,6 +86,33 @@ int sgn(double d) // Mimimcs the mathematical sgn function
 	return 0;
 }
 
+double filtered_average(std::vector<double> values) {
+    // Sort the values in ascending order
+    std::sort(values.begin(), values.end());
+
+    // Calculate the median value
+    double median = values[values.size() / 2];
+
+    // Filter out any values that are more than 1.5 times the interquartile range from the median
+    double q1 = values[values.size() / 4];
+    double q3 = values[3 * values.size() / 4];
+    double iqr = q3 - q1;
+    std::vector<double> filtered_values;
+    for (int x : values) {
+        if (x >= median - 1.5 * iqr && x <= median + 1.5 * iqr) {
+            filtered_values.push_back(x);
+        }
+    }
+
+    // Calculate the average of the filtered values
+    double sum = 0;
+	for (int x : filtered_values) {
+		sum += x;
+	}
+	return sum / filtered_values.size();
+}
+
+
 void turnViaIMU(double heading){
 	double error = heading - imu.get_rotation();
 	int rotation;
@@ -371,38 +398,70 @@ void matchLoadDisks(double lsdTarget){
 /////////////////PROTOTYPE METHODS//////////////////////
 
 void logData(){
-	/*
-	Goals
-	1. take a snapshot of the field
-	2. set 7 distinctly different signatures
-	a. One option is find the most prevalent sifferent sigs, don't know how to do that
-	b. or start at these spots
-	________________________________
-	|			    X				|
-	|								|
-	|	X			X			X   |
-	|								|
-	|   X			X			X   |
-	|_______________________________|
-	and move a certain direction until significantly different sigs
-	c. or start at the zero point and move out until different sigs
-	3. read all objects with these 7 sigs
-	4. stitch into one master image with positional data
-	5. Find a robot on the field, confirm with distance sensor
-	6. pop up the blocker
-	*/
-	// CURRENT CODE - UNTESTED
-	// gets 10 largest objects and saves all data to sd card
-	pros::vision_object_s_t objects[VISION_PRECISION]; // this is precision, change as needed
-	vision.read_by_size(0, VISION_PRECISION, objects);
-	for (int i=0; i <= VISION_PRECISION; i++){
-		std::cout << objects[i].signature << ";" << objects[i].x_middle_coord << ";" << objects[i].y_middle_coord << ";" << objects[i].width << ";" << objects[i].height << ";";
-	}
-	std::cout << lsd.get() << std::endl;
-	/*std::ofstream dataFile;
+// CURRENT CODE - UNTESTED
+	// create vector of motor values
+	std::vector<double> motor_values(8);
+	motor_values[0] = mBRO.get_actual_velocity();
+	motor_values[1] = mBRI.get_actual_velocity();
+	motor_values[2] = mFRO.get_actual_velocity();
+	motor_values[3] = mFRI.get_actual_velocity();
+	motor_values[4] = mBLO.get_actual_velocity();
+	motor_values[5] = mBLI.get_actual_velocity();
+	motor_values[6] = mFLO.get_actual_velocity();
+	motor_values[7] = mFLI.get_actual_velocity();
+	//saves all data to sd card
+	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	for (i=0, i <= VISION_PRECISION, i++){
-		dataFile << objects[i] << ";";
+	dataFile << float(filtered_average(motor_values)) << float(lsd.get()) << float(msd.get()) << float(bsd.get()) << std::endl;
+}
+
+void updateLSDTime() {
+    if (lsd.get() < 5280 && occurance_counter < 3) {
+        // If the LSD just detected a value less than 5280, update the timeSinceLSD variable
+        occurance_counter ++;
+		timeSinceLSD += 20;
+    } else if (lsd.get() < 5280 && occurance_counter >=3){
+		timeSinceLSD = 0;
+		occurance_counter = 0;
+	else{
+		timeSinceLSD += 20;
 	}
-	dataFile << lsd.get() << std::endl;	*/
+
+	}
+}
+
+void giveInstruction(){
+	auto model = Model::load("/usd/auton_blocker.model");
+	if (count > 2){
+		count = 0;
+		// convert everything to floats so the tensor doesn't cry
+		float lsd = lsd.get();
+		float msd = msd.get();
+		float bsd = bsd.get();
+		float time_since_lsd = timeSinceLSD;
+		// load model and create input tensor
+		model = Model::load("/usd/keras_ann.model");
+		Tensor in{1, 4};
+		in.data_[0] = lsd;
+		in.data_[1] = msd;
+		in.data_[2] = bsd;
+		in.data_[3] = time_since_lsd;
+
+		// Run prediction
+		Tensor out = model(in);
+		float raw_result = out.data_[0];
+		speed = (raw_result * 127)/200;
+		mBRO = speed;
+		mBRI = speed;
+		mFRO = speed;
+		mFRI = speed;
+		mBLO = speed;
+		mBLI = speed;
+		mFLO = speed;
+		mFLI = speed;
+	
+		std::cout << result << std::endl;
+	} else{
+		count ++;
+	}
 }

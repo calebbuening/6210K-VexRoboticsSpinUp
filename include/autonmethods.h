@@ -18,5 +18,7 @@ extern void driveViaTime(double time, double vel);
 extern void logData();
 extern double getLSD(double rangeStart, double rangeStop);
 extern void flashScreen();
+extern void updateLSDTime();
+extern void giveInstruction();
 
 #endif

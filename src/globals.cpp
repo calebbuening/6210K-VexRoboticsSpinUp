@@ -21,14 +21,14 @@
 
 #define GYRO 13
 #define LSD 5
+#define MSD 19
+#define BSD 18
 #define VISION 14
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
 
 #define STD 10 // The standard task delay
-
-int VISION_PRECISION = 10;
 
 double startTime = 0;
 bool fiveSecondWarningTriggered = false;
@@ -46,6 +46,7 @@ bool shieldLauncherAuto = true;
 bool highReleaseAuto = true;
 static lv_style_t black_style;
 static lv_style_t white_style;
+double timeSinceLSD = 0;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
@@ -72,7 +73,8 @@ pros::Motor mCATA(MCATA, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_
 pros::IMU imu(GYRO);
 pros::GPS gps(GPS_PORT, GPS_OFFSET_X, GPS_OFFSET_Y);
 pros::Distance lsd(LSD);
-pros::Vision vision(VISION, pros::E_VISION_ZERO_CENTER);
+pros::Distance msd(MSD);
+pros::Distance bsd(BSD);
 
 void reloadCatapult(){
 	// Wait for the catapult to fully fire

@@ -5,7 +5,6 @@
 #define _GLOBALS_H_
 
 // Variables
-extern int VISION_PRECISION;
 extern double startTime;
 extern bool fiveSecondWarningTriggered;
 extern bool stringReleased;
@@ -22,6 +21,7 @@ extern bool shieldLauncherAuto;
 extern bool highReleaseAuto;
 extern lv_style_t black_style;
 extern lv_style_t white_style;
+extern double timeSinceLSD;
 
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
@@ -48,7 +48,8 @@ extern pros::Motor mCATA;
 extern pros::IMU imu;
 extern pros::GPS gps;
 extern pros::Distance lsd;
-extern pros::Vision vision;
+extern pros::Distance msd;
+extern pros::Distance bsd;
 
 extern void reloadCatapult();
 extern void changeColor();

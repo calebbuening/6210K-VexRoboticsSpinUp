@@ -65,15 +65,13 @@ void opcontrol() {
 			// Adjust which type we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 3) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 3;
+			if(selectionIndex > 1) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 1;
 
 			// Print selected type
 			switch(selectionIndex){
-				case 0: master.print(1, 0, "     Competition    "); master.print(2, 0, "    mBRO enabled    "); skills = false; mBROState = true; break;
-				case 1: master.print(1, 0, "        Skills      "); master.print(2, 0, "    mBRO enabled    "); skills = true; mBROState = true; break;
-				case 2: master.print(1, 0, "        Skills*     "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
-				case 3: master.print(1, 0, "     Competition*   "); master.print(2, 0, "    Re-tensioner    "); skills = false; mBROState = false; break;
+				case 0: master.print(1, 0, "     Competition    "); skills = false; break;
+				case 1: master.print(1, 0, "        Skills      "); skills = true; break;
 			}
 			
 			if(master.get_digital_new_press(DIGITAL_A)){
@@ -81,14 +79,6 @@ void opcontrol() {
 
 			pros::delay(60);
 			}
-		}
-		master.clear();
-
-		// If we are in catapult mode, make sure the catapult is in the right port
-		if(!mBROState){
-			pros::delay(60);
-			master.print(1, 0, " Ensure mCata in 17 ");
-			while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		}
 		master.clear();
 
@@ -115,7 +105,7 @@ void opcontrol() {
 				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
 				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
 				case 6: master.print(1, 0, "       Testing      "); auton = 'T'; break;
-				case 7: master.print(1, 0, "     Experimental   "); auton = 'E'; break;
+				case 7: master.print(1, 0, "    Auton Blocker   "); auton = 'E'; break;
 				default: master.print(1, 0,"ERROR: Invalid auton"); break;
 			}
 
@@ -423,7 +413,7 @@ void opcontrol() {
 		}
 
 		loopCounter++;
-
+		
 		pros::delay(20);
 	}
 }

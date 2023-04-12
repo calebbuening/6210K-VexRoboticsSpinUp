@@ -441,6 +441,16 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
-		driveViaIMU(2, 0);
+		driveViaIMU(.5, 0);
+		turnViaIMU(45);
+		while(true){
+			if(mFLI.get_position() > 8){
+				driveViaIMU(-1, 45);
+			}
+			giveInstruction();
+			updateLSDTime();
+			pros::delay(20)
+
+		}
 	}
 }
