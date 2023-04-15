@@ -448,7 +448,6 @@ void autonomous(){
 				driveViaIMU(-1, 45);
 			}
 			giveInstruction();
-			updateLSDTime();
 			pros::delay(20);
 
 		}

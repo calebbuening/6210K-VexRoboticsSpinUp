@@ -1,4 +1,8 @@
 #include "main.h"
+#include "api.h"
+#include "globals.h"
+#include <fstream>
+#include <string>
 
 #ifndef _AUTONMETHODS_H_
 #define _AUTONMETHODS_H_
@@ -18,7 +22,7 @@ extern void driveViaTime(double time, double vel);
 extern void logData();
 extern double getLSD(double rangeStart, double rangeStop);
 extern void flashScreen();
-extern void updateLSDTime();
+extern double updateLSDTime();
 extern void giveInstruction();
 
 #endif

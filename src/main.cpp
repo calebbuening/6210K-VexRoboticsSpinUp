@@ -413,7 +413,7 @@ void opcontrol() {
 		}
 
 		loopCounter++;
-		
+		logData();
 		pros::delay(20);
 	}
 }

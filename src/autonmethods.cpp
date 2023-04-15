@@ -1,6 +1,12 @@
 #include "main.h"
+#include "api.h"
 #include "globals.h"
-#include "python\model.h"
+#include "src/model.h"
+#include <fstream>
+#include <string>
+
+using keras2cpp::Model;
+using keras2cpp::Tensor;
 
 void eliScoreRoller(){
 	int loop=0;
@@ -99,7 +105,7 @@ double filtered_average(std::vector<double> values) {
     double q3 = values[3 * values.size() / 4];
     double iqr = q3 - q1;
     std::vector<double> filtered_values;
-    for (int x : values) {
+    for (double x : values) {
         if (x >= median - 1.5 * iqr && x <= median + 1.5 * iqr) {
             filtered_values.push_back(x);
         }
@@ -107,7 +113,7 @@ double filtered_average(std::vector<double> values) {
 
     // Calculate the average of the filtered values
     double sum = 0;
-	for (int x : filtered_values) {
+	for (double x : filtered_values) {
 		sum += x;
 	}
 	return sum / filtered_values.size();
@@ -200,62 +206,6 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mFLO.move_velocity(-vel + rotation);
 			mFLI.move_velocity(-vel + rotation);
 			pos = (mBRI.get_position() + mBLI.get_position())/2;
-			pros::delay(5);
-		}
-	}
-	mBRO.move_velocity(0);
-	mBRI.move_velocity(0);
-	mFRO.move_velocity(0);
-	mFRI.move_velocity(0);
-	mBLO.move_velocity(0);
-	mBLI.move_velocity(0);
-	mFLO.move_velocity(0);
-	mFLI.move_velocity(0);
-}
-
-void strafeViaIMU(double dist, double heading, double motorAdjust){ //positive dist is strafe right
-	mBRI.tare_position();
-	mBLI.tare_position();
-	double pos = (mBRI.get_position() + mBLI.get_position())/2;
-	dist += pos;
-	if(dist > pos){
-		while(pos < dist){
-			double error = heading - imu.get_rotation();
-			int rotation;
-			if(std::fabs(error) < 15){ // Was 30
-				rotation = (12 * error); // Was 6
-			}else{
-				rotation = 200 * sgn(error); // was 200
-			}
-			mBRO.move_velocity(200 - rotation);
-			mBRI.move_velocity(200 - rotation);
-			mFRO.move_velocity(-200 + rotation);
-			mFRI.move_velocity(-200 + rotation);
-			mBLO.move_velocity(-200 + rotation * (.75 + mBROState)); //adjust for motor
-			mBLI.move_velocity(-200 + rotation * (.75 + mBROState));
-			mFLO.move_velocity(200 + rotation * (.75 + mBROState));
-			mFLI.move_velocity(200 + rotation * (.75 + mBROState));
-			pos = (mFLI.get_position() + mFLO.get_position())/2;
-			pros::delay(5);
-		}
-	}else{
-		while(pos > dist){
-			double error = heading - imu.get_rotation();
-			int rotation;
-			if(std::fabs(error) < 30){
-				rotation = (6 * error); // Was 6
-			}else{
-				rotation = 200 * sgn(error); // was 200
-			}
-			mBRO.move_velocity(-200 - rotation);
-			mBRI.move_velocity(-200 - rotation);
-			mFRO.move_velocity(200 - rotation);
-			mFRI.move_velocity(200 - rotation);
-			mBLO.move_velocity(200 + rotation * (.75 + mBROState));
-			mBLI.move_velocity(200 + rotation * (.75 + mBROState));
-			mFLO.move_velocity(-200 + rotation * (.75 + mBROState));
-			mFLI.move_velocity(-200 + rotation * (.75 + mBROState));
-			pos = (mFLI.get_position() + mFLO.get_position())/2;
 			pros::delay(5);
 		}
 	}
@@ -397,6 +347,20 @@ void matchLoadDisks(double lsdTarget){
 }
 
 /////////////////PROTOTYPE METHODS//////////////////////
+double updateLSDTime() {
+    if (lsd.get() < 5280 && count < 3) {
+        // If the LSD just detected a value less than 5280, update the timeSinceLSD variable
+        count++;
+		timeSinceLSD += 20;
+    } else if (lsd.get() < 5280 && count >=3){
+		timeSinceLSD = 0;
+		count = 0;
+	}
+	else{
+		timeSinceLSD += 20;
+	}
+	return timeSinceLSD;
+}
 
 void logData(){
 // CURRENT CODE - UNTESTED
@@ -410,30 +374,17 @@ void logData(){
 	motor_values[5] = mBLI.get_actual_velocity();
 	motor_values[6] = mFLO.get_actual_velocity();
 	motor_values[7] = mFLI.get_actual_velocity();
+
+	double LSD_TIME = updateLSDTime();
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(filtered_average(motor_values)) << float(lsd.get()) << float(msd.get()) << float(bsd.get()) << std::endl;
+	dataFile << float(filtered_average(motor_values)) << "," << float(lsd.get()) << "," << float(msd.get()) << "," << float(bsd.get()) << "," << float(LSD_TIME) << std::endl;
+	dataFile.close();
 }
 
-void updateLSDTime() {
-    if (lsd.get() < 5280 && count < 3) {
-        // If the LSD just detected a value less than 5280, update the timeSinceLSD variable
-        count ++;
-		timeSinceLSD += 20;
-    } else if (lsd.get() < 5280 && count >=3){
-		timeSinceLSD = 0;
-		count = 0;
-	}
-	else{
-		timeSinceLSD += 20;
-	}
-}
 
 void giveInstruction(){
-	using keras2cpp::Model;
-	using keras2cpp::Tensor;
-
 	auto model = Model::load("/usd/auton_blocker.model");
 	if (count > 2){
 		count = 0;
@@ -441,9 +392,10 @@ void giveInstruction(){
 		float Lsd = lsd.get();
 		float Msd = msd.get();
 		float Bsd = bsd.get();
-		float time_since_lsd = timeSinceLSD;
+		double time_since_lsd = updateLSDTime();
+		time_since_lsd = float(time_since_lsd);
 		// load model and create input tensor
-		model = Model::load("/usd/keras_ann.model");
+		model = Model::load("/usd/auton_blocker.model");
 		Tensor in{1, 4};
 		in.data_[0] = Lsd;
 		in.data_[1] = Msd;
@@ -467,4 +419,5 @@ void giveInstruction(){
 	} else{
 		count ++;
 	}
+	
 }
