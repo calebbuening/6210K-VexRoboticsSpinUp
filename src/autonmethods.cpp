@@ -416,6 +416,8 @@ void giveInstruction(){
 		mFLI = speed;
 	
 		std::cout << speed << std::endl;
+		master.clear();
+		master.print(0,0, "Speed: %f", speed);
 	} else{
 		count ++;
 	}
