@@ -405,7 +405,7 @@ void giveInstruction(){
 		// Run prediction
 		Tensor out = model(in);
 		double raw_result = out.data_[0];
-		double speed = (raw_result * 127)/200;
+		double speed = (raw_result * 127)/600;
 		mBRO = speed;
 		mBRI = speed;
 		mFRO = speed;
