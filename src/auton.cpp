@@ -4,14 +4,6 @@
 
 #define STD 10 // The standard task delay
 
-void tension(){
-	// Tension the catapult
-	mCATA = 127;
-	while(mCATA.get_position() < 3.7) pros::Task::delay(STD);
-	mCATA = 0;
-	mCATA.brake();
-}
-
 void autonomous(){
 
 	// TO PREVENT INSANE LEVELS OF DRIFT FROM SITTING AROUND
@@ -134,7 +126,6 @@ void autonomous(){
 		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 
 		// Flash the screen to indicate the start of the program
-		pros::Task taskTensionAgain(tension, "Retensioning...");
 		pros::Task taskFlashScreen(flashScreen, "Flash Screen");
 
 		// Record the currect distance from the wall, to use when realigning
@@ -144,10 +135,6 @@ void autonomous(){
 			pros::delay(5);
 		}
 
-		// Score the previously loaded discs twice using the scoring loop
-		for(int i = 0; i <= 1; i++){
-			matchLoadDisks(distTarget);
-		}
 
 		// Manually take a third shot to avoid the latter part of the previously written loop
 		// NOTE: The following values should mirror the scoring loop
@@ -158,7 +145,6 @@ void autonomous(){
 		pros::delay(200); //uncomment if it isn't working, this is delay for shot
 		catapultRelease.set_value(true);
 		catapultState = true;
-		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 
 		// Turn and drive to face roller, the score
 		driveViaIMU(-7.7, 90); // -7.5
@@ -225,8 +211,6 @@ void autonomous(){
 		imu.set_rotation(imu.get_rotation()-180);
 
 		// Take a shot
-		matchLoadDisks(distTarget);
-
 		// Load the preload again
 		pros::delay(800);
 
@@ -241,7 +225,6 @@ void autonomous(){
 		catapultState = true;
 
 		// Reload the catapult again because idk why
-		pros::Task taskReloadCatapult2(reloadCatapult, "Reload Catapult");
 
 		// TODO: Check and see how much this mirrors the original
 		// Turn and drive to face roller, score
