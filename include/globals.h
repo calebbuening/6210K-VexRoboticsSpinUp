@@ -11,7 +11,6 @@ extern bool stringReleased;
 extern bool clockOverride;
 extern char auton;
 extern bool skills;
-extern bool mBROState;
 extern bool initialized;
 extern bool catapultState;
 extern bool shieldReleased;
@@ -19,8 +18,6 @@ extern bool highReleased;
 extern bool stringLauncherAuto;
 extern bool shieldLauncherAuto;
 extern bool highReleaseAuto;
-extern lv_style_t black_style;
-extern lv_style_t white_style;
 
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
@@ -41,14 +38,10 @@ extern pros::Motor mBLO;
 extern pros::Motor mBLI;
 extern pros::Motor mFLO;
 extern pros::Motor mFLI;
-extern pros::Motor mCATA;
 
 // Sensors
 extern pros::IMU imu;
 extern pros::GPS gps;
 extern pros::Distance lsd;
-
-extern void reloadCatapult();
-extern void changeColor();
 
 #endif // _GLOBALS_H_

@@ -39,9 +39,6 @@ void opcontrol() {
 
 		pros::delay(60);
 
-		// Make sure the catapult holds
-		mCATA.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
 		// Lock in the catapult pneumatic
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
@@ -49,11 +46,6 @@ void opcontrol() {
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		catapultRelease.set_value(false);
 		pros::delay(60);
-
-		// Set current position to 0, then load catapult
-		mCATA.tare_position();
-		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-		master.clear();
 
 		// Select mode
 		pros::delay(60);
@@ -65,15 +57,13 @@ void opcontrol() {
 			// Adjust which type we have selected
 			if(master.get_digital_new_press(DIGITAL_RIGHT)) selectionIndex++;
 			if(master.get_digital_new_press(DIGITAL_LEFT)) selectionIndex--;
-			if(selectionIndex > 3) selectionIndex = 0;
-			if(selectionIndex < 0) selectionIndex = 3;
+			if(selectionIndex > 1) selectionIndex = 0;
+			if(selectionIndex < 0) selectionIndex = 1;
 
 			// Print selected type
 			switch(selectionIndex){
-				case 0: master.print(1, 0, "     Competition    "); master.print(2, 0, "    mBRO enabled    "); skills = false; mBROState = true; break;
-				case 1: master.print(1, 0, "        Skills      "); master.print(2, 0, "    mBRO enabled    "); skills = true; mBROState = true; break;
-				case 2: master.print(1, 0, "        Skills*     "); master.print(2, 0, "    Re-tensioner    "); skills = true; mBROState = false; break;
-				case 3: master.print(1, 0, "     Competition*   "); master.print(2, 0, "    Re-tensioner    "); skills = false; mBROState = false; break;
+				case 0: master.print(1, 0, "     Competition    "); skills = false; break;
+				case 1: master.print(1, 0, "        Skills      "); skills = true; break;
 			}
 			
 			if(master.get_digital_new_press(DIGITAL_A)){
@@ -81,14 +71,6 @@ void opcontrol() {
 
 			pros::delay(60);
 			}
-		}
-		master.clear();
-
-		// If we are in catapult mode, make sure the catapult is in the right port
-		if(!mBROState){
-			pros::delay(60);
-			master.print(1, 0, " Ensure mCata in 17 ");
-			while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		}
 		master.clear();
 
@@ -114,8 +96,8 @@ void opcontrol() {
 				case 3: master.print(1, 0, "   Left Side Auton  "); auton = 'L'; break;
 				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
 				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
-				case 6: master.print(1, 0, "       Testing      "); auton = 'T'; break;
-				case 7: master.print(1, 0, "     Experimental   "); auton = 'E'; break;
+				case 6: master.print(1, 0, "    Auton Blocker   "); auton = 'T'; break;
+				case 7: master.print(1, 0, "    Experimental    "); auton = 'E'; break;
 				default: master.print(1, 0,"ERROR: Invalid auton"); break;
 			}
 
@@ -154,28 +136,17 @@ void opcontrol() {
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
 			catapultRelease.set_value(true);
-			if(!mBROState) pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 		}
-		std::cout << mCATA.get_position() << std::endl;
 
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
-		double strafeJoy = master.get_analog(ANALOG_LEFT_X) / 127;
 		double rightJoy = master.get_analog(ANALOG_RIGHT_X) / 127;
 
 		// Deadzone by 10%
 		if(std::fabs(leftJoy) < .05) leftJoy = 0;
 		if(std::fabs(rightJoy) < .05) rightJoy = 0;
-		if(std::fabs(strafeJoy) < .05) strafeJoy = 0;
 
-		// Drag adjustment for crappy motors
-		double actualFrontDiffPct = 0; // (average(frontLeft.get_actual_velocity()) - average(frontRight.get_actual_velocity())) / 400;
-		double frontTurnAdj = 0; // actualFrontDiffPct - rightJoy;
-		double actualBackDiffPct = 0; // (average(backLeft.get_actual_velocity()) - average(backRight.get_actual_velocity())) / 400;
-		double backTurnAdj = 0; // actualBackDiffPct - rightJoy;
-		
 		// Assign speeds after scaling them back to 100 //
-
 		double speedMultiplier = 1;
 
 		if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
@@ -183,14 +154,10 @@ void opcontrol() {
 		double leftMotorAdjust = 1;
 		double rightMotorAdjust = 1;
 
-		if(!mBROState){
-			leftMotorAdjust = .75;
-		}
-
 		int intOverflow = 2147483647; //value returned when unable to communicate
 
 		// left side adjustments
-		if (mBROState && mBRO.get_voltage() == intOverflow){
+		if (mBRO.get_voltage() == intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
 		if (mBRI.get_voltage() == intOverflow){
@@ -218,20 +185,20 @@ void opcontrol() {
 		}
 
 		// Front Left
-		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
-		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mBRO = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mBRI = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
 
 		// Rear Left
-		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
-		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier * rightMotorAdjust;
+		mFRO = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mFRI = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
 
 		// Front Right
-		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
-		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mBLO = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mBLI = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Rear Right
-		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
-		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mFLO = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mFLI = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Second controller code (runs every 3 loops to prevent controller rendering errors
 		// . means normal - means somethin is up
