@@ -7,6 +7,8 @@
 
 using keras2cpp::Model;
 using keras2cpp::Tensor;
+double timeSinceLSD = 0;
+double count = 0;
 
 void eliScoreRoller(){
 	int loop=0;
@@ -277,75 +279,6 @@ void flashScreen(){
 	lv_obj_set_style(lv_scr_act(), &black_style);
 }
 
-void matchLoadDisks(double lsdTarget){
-
-	/* Function order:
-	 * 1. Shoot the preload
-	 * 2. Begin reloading catapult
-	 * 3. Undo the arc
-	 * 4. Drive reverse into loading area
-	 * 5. Wait for disc to be loaded
-	 * 6. Arc towards the goal
-	 * 7. Repeat steps 1-6
-	*/
-
-	// Provide a short wait time for loading
-	pros::delay(800);
-
-	// Drive to the shooting location
-	driveViaIMU(.75, 0, 200); //.5
-	turnViaIMU(90);
-	driveViaIMU(2.1, 90); //1.9
-	pros::delay(200); // come to rest
-
-	// Fire and begin reloading
-	catapultRelease.set_value(true);
-	catapultState = true;
-	pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
-
-	// Get back to the loading area
-	driveViaIMU(-2.1, 90); //-1.9
-	turnViaIMU(0);
-	driveViaIMU(-.45, 0, 200); //-.2
-
-	// Press up against the wall and align using the provided distance sensor target
-	driveViaTime(500, -400);
-	double dist = getLSD(lsdTarget - 500, lsdTarget + 500);
-	if (dist < (lsdTarget - 40)){
-		while (dist < (lsdTarget - 40)){
-			mBRO.move_velocity(50);
-			mBRI.move_velocity(50);
-			mFRO.move_velocity(-50);
-			mFRI.move_velocity(-50);
-			mBLO.move_velocity(-50);
-			mBLI.move_velocity(-50);
-			mFLO.move_velocity(50);
-			mFLI.move_velocity(50);
-			dist = lsd.get();
-			pros::delay(10);
-		}
-	}
-	if (dist > (lsdTarget + 40)){
-		while (dist > (lsdTarget + 40)){ //strafe right
-			mBRO.move_velocity(-50);
-			mBRI.move_velocity(-50);
-			mFRO.move_velocity(50);
-			mFRI.move_velocity(50);
-			mBLO.move_velocity(50 * (.75 + mBROState));
-			mBLI.move_velocity(50 * (.75 + mBROState));
-			mFLO.move_velocity(-50 * (.75 + mBROState));
-			mFLI.move_velocity(-50 * (.75 + mBROState));
-			dist = lsd.get();
-			pros::delay(10);
-		}
-	}
-
-	// Flash the screen to show we are ready to load while we press up against the side of the field
-	pros::Task taskFlashScreen(flashScreen, "Flash Screen");
-	driveViaTime(200, -100);
-
-}
-
 /////////////////PROTOTYPE METHODS//////////////////////
 double updateLSDTime() {
     if (lsd.get() < 5280 && count < 3) {
@@ -365,21 +298,31 @@ double updateLSDTime() {
 void logData(){
 // CURRENT CODE - UNTESTED
 	// create vector of motor values
-	std::vector<double> motor_values(8);
-	motor_values[0] = mBRO.get_actual_velocity();
-	motor_values[1] = mBRI.get_actual_velocity();
-	motor_values[2] = mFRO.get_actual_velocity();
-	motor_values[3] = mFRI.get_actual_velocity();
-	motor_values[4] = mBLO.get_actual_velocity();
-	motor_values[5] = mBLI.get_actual_velocity();
-	motor_values[6] = mFLO.get_actual_velocity();
-	motor_values[7] = mFLI.get_actual_velocity();
+	std::vector<double> motor_speeds(8);
+	motor_speeds[0] = mBRO.get_actual_velocity();
+	motor_speeds[1] = mBRI.get_actual_velocity();
+	motor_speeds[2] = mFRO.get_actual_velocity();
+	motor_speeds[3] = mFRI.get_actual_velocity();
+	motor_speeds[4] = mBLO.get_actual_velocity();
+	motor_speeds[5] = mBLI.get_actual_velocity();
+	motor_speeds[6] = mFLO.get_actual_velocity();
+	motor_speeds[7] = mFLI.get_actual_velocity();
+
+	std::vector<double> motor_positions(8);
+	motor_positions[0] = mBRO.get_position();
+	motor_positions[1] = mBRI.get_position();
+	motor_positions[2] = mFRO.get_position();
+	motor_positions[3] = mFRI.get_position();
+	motor_positions[4] = mBLO.get_position();
+	motor_positions[5] = mBLI.get_position();
+	motor_positions[6] = mFLO.get_position();
+	motor_positions[7] = mFLI.get_position();
 
 	double LSD_TIME = updateLSDTime();
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(filtered_average(motor_values)) << "," << float(lsd.get()) << "," << float(msd.get()) << "," << float(bsd.get()) << "," << float(LSD_TIME) << std::endl;
+	dataFile << float(filtered_average(motor_speeds)) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(LSD_TIME) << std::endl;
 	dataFile.close();
 }
 
@@ -389,6 +332,17 @@ void giveInstruction(){
 	if (count > 2){
 		count = 0;
 		// convert everything to floats so the tensor doesn't cry
+		std::vector<double> motor_positions(8);
+		motor_positions[0] = mBRO.get_position();
+		motor_positions[1] = mBRI.get_position();
+		motor_positions[2] = mFRO.get_position();
+		motor_positions[3] = mFRI.get_position();
+		motor_positions[4] = mBLO.get_position();
+		motor_positions[5] = mBLI.get_position();
+		motor_positions[6] = mFLO.get_position();
+		motor_positions[7] = mFLI.get_position();
+
+		float pos = filtered_average(motor_positions);
 		float Lsd = lsd.get();
 		float Msd = msd.get();
 		float Bsd = bsd.get();
@@ -396,16 +350,16 @@ void giveInstruction(){
 		time_since_lsd = float(time_since_lsd);
 		// load model and create input tensor
 		model = Model::load("/usd/auton_blocker.model");
-		Tensor in{1, 4};
-		in.data_[0] = Lsd;
-		in.data_[1] = Msd;
-		in.data_[2] = Bsd;
-		in.data_[3] = time_since_lsd;
+		Tensor in{1, 5};
+		in.data_[0] = pos;
+		in.data_[1] = Lsd;
+		in.data_[2] = Msd;
+		in.data_[3] = Bsd;
+		in.data_[4] = time_since_lsd;
 
 		// Run prediction
 		Tensor out = model(in);
-		double raw_result = out.data_[0];
-		double speed = (raw_result * 127)/600;
+		double speed = out.data_[0];
 		mBRO = speed;
 		mBRI = speed;
 		mFRO = speed;
@@ -417,7 +371,7 @@ void giveInstruction(){
 	
 		std::cout << speed << std::endl;
 		master.clear();
-		master.print(0,0, "Speed: %f", speed);
+		master.print(0,0, "Speed: %d", speed);
 	} else{
 		count ++;
 	}

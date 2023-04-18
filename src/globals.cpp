@@ -46,8 +46,6 @@ bool shieldLauncherAuto = true;
 bool highReleaseAuto = true;
 static lv_style_t black_style;
 static lv_style_t white_style;
-double timeSinceLSD = 0;
-double count = 0;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);

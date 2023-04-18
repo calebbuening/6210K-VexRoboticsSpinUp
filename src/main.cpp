@@ -39,9 +39,6 @@ void opcontrol() {
 
 		pros::delay(60);
 
-		// Make sure the catapult holds
-		mCATA.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
 		// Lock in the catapult pneumatic
 		master.print(0, 0, "Press A once");
 		pros::delay(60);
@@ -50,9 +47,6 @@ void opcontrol() {
 		catapultRelease.set_value(false);
 		pros::delay(60);
 
-		// Set current position to 0, then load catapult
-		mCATA.tare_position();
-		pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 		master.clear();
 
 		// Select mode
@@ -137,32 +131,18 @@ void opcontrol() {
 
 	while (true) {
 
-		if(master.get_digital_new_press(DIGITAL_DOWN)){
-			autonomous();
-		}
-
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
 			catapultRelease.set_value(true);
-			if(!mBROState) pros::Task taskReloadCatapult(reloadCatapult, "Reload Catapult");
 		}
-		std::cout << mCATA.get_position() << std::endl;
 
 		// Scale joysticks down to percentages
 		double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
-		double strafeJoy = master.get_analog(ANALOG_LEFT_X) / 127;
 		double rightJoy = master.get_analog(ANALOG_RIGHT_X) / 127;
 
 		// Deadzone by 10%
 		if(std::fabs(leftJoy) < .05) leftJoy = 0;
 		if(std::fabs(rightJoy) < .05) rightJoy = 0;
-		if(std::fabs(strafeJoy) < .05) strafeJoy = 0;
-
-		// Drag adjustment for crappy motors
-		double actualFrontDiffPct = 0; // (average(frontLeft.get_actual_velocity()) - average(frontRight.get_actual_velocity())) / 400;
-		double frontTurnAdj = 0; // actualFrontDiffPct - rightJoy;
-		double actualBackDiffPct = 0; // (average(backLeft.get_actual_velocity()) - average(backRight.get_actual_velocity())) / 400;
-		double backTurnAdj = 0; // actualBackDiffPct - rightJoy;
 		
 		// Assign speeds after scaling them back to 100 //
 
@@ -173,55 +153,51 @@ void opcontrol() {
 		double leftMotorAdjust = 1;
 		double rightMotorAdjust = 1;
 
-		if(!mBROState){
-			leftMotorAdjust = .75;
-		}
-
 		int intOverflow = 2147483647; //value returned when unable to communicate
 
 		// left side adjustments
-		if (mBROState && mBRO.get_voltage() == intOverflow){
+		if (mBROState && mBRO.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mBRI.get_voltage() == intOverflow){
+		if (mBRI.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mFRO.get_voltage() == intOverflow){
+		if (mFRO.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mFRI.get_voltage() == intOverflow){
+		if (mFRI.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
 
 		// Right side adjustment
-		if (mBLO.get_voltage() == intOverflow){
+		if (mBLO.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mBLI.get_voltage() == intOverflow){
+		if (mBLI.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mFLO.get_voltage() == intOverflow){
+		if (mFLO.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mFLI.get_voltage() == intOverflow){
+		if (mFLI.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
 
 		// Front Left
-		mBRO = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
-		mBRI = (leftJoy - rightJoy - frontTurnAdj + strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mBRO = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mBRI = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
 
 		// Rear Left
-		mFRO = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127 * speedMultiplier * rightMotorAdjust;
-		mFRI = (leftJoy - rightJoy - backTurnAdj - strafeJoy) * 127	* speedMultiplier * rightMotorAdjust;
+		mFRO = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mFRI = (leftJoy - rightJoy) * 127	* speedMultiplier * rightMotorAdjust;
 
 		// Front Right
-		mBLO = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
-		mBLI = (leftJoy + rightJoy + frontTurnAdj - strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mBLO = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mBLI = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Rear Right
-		mFLO = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
-		mFLI = (leftJoy + rightJoy + backTurnAdj + strafeJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mFLO = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
+		mFLI = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
 
 		// Second controller code (runs every 3 loops to prevent controller rendering errors
 		// . means normal - means somethin is up
@@ -413,7 +389,7 @@ void opcontrol() {
 		}
 
 		loopCounter++;
-		logData();
+		
 		pros::delay(20);
 	}
 }

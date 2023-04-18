@@ -21,8 +21,7 @@ extern bool shieldLauncherAuto;
 extern bool highReleaseAuto;
 extern lv_style_t black_style;
 extern lv_style_t white_style;
-extern double timeSinceLSD;
-extern double count;
+
 
 // Pneumatics
 extern pros::ADIDigitalOut stringRelease;
