@@ -18,10 +18,8 @@ extern void driveViaIMU(double dist, double heading, double vel = 200);
 
 // Auton Methods
 extern void driveViaTime(double time, double vel);
-extern void logData();
-extern double getLSD(double rangeStart, double rangeStop);
-extern void flashScreen();
-extern double updateLSDTime();
+extern void logData(double leftJoy);
+extern double updateMSDTime();
 extern void giveInstruction();
 
 #endif

@@ -305,7 +305,7 @@ void autonomous(){
 			// Rear Right
 			mFLO = (leftJoy) * 127;
 			mFLI = (leftJoy) * 127;
-			logData();
+			logData(leftJoy);
 			pros::delay(10);
 		}
 	}

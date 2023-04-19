@@ -7,7 +7,7 @@
 
 using keras2cpp::Model;
 using keras2cpp::Tensor;
-double timeSinceLSD = 0;
+double timeSinceMSD = 0;
 double count = 0;
 
 void eliScoreRoller(){
@@ -121,14 +121,13 @@ double filtered_average(std::vector<double> values) {
 	return sum / filtered_values.size();
 }
 
-
 void turnViaIMU(double heading){
 	double error = heading - imu.get_rotation();
 	int rotation;
-	while(std::fabs(error) > .5)
+	while(std::fabs(error) > .1)
 	{
 		if(std::fabs(error) < 30){
-			rotation = -(9 * error); // Was 6
+			rotation = -(6 * error); // Was 6
 		}else{
 			rotation = -200 * sgn(error); // was 200
 		}
@@ -144,7 +143,7 @@ void turnViaIMU(double heading){
 		error = heading - imu.get_rotation();
 		pros::delay(5);
 	}
-	rotation = 120 * sgn(error); // was 30
+	rotation = 30 * sgn(error); // was 30
 	mBRO.move_velocity(rotation);
 	mBRI.move_velocity(rotation);
 	mFRO.move_velocity(rotation);
@@ -175,7 +174,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			double error = heading - imu.get_rotation();
 			int rotation;
 			if(std::fabs(error) < 15){ // Was 30
-				rotation = (12 * error); // Was 6
+				rotation = (6 * error); // Was 6
 			}else{
 				rotation = vel * sgn(error); // was 200
 			}
@@ -195,7 +194,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			double error = heading - imu.get_rotation();
 			int rotation;
 			if(std::fabs(error) < 15){
-				rotation = (12 * error); // Was 6
+				rotation = (6 * error); // Was 6
 			}else{
 				rotation = vel * sgn(error); // was 200
 			}
@@ -242,72 +241,25 @@ void driveViaTime(double time, double vel){
 	mFLI.move_velocity(0);
 }
 
-double getLSD(double rangeStart, double rangeStop){
-	double dist;
-	std::vector<double> values;
-
-	for (double i = rangeStart; i <= rangeStop; i ++){
-		values.push_back(i);
-	}
-	bool isInRange = false;
-	while (!isInRange){
-		dist = lsd.get();
-		for (int i = 0; i < values.size() + 1; i++){
-			if (std::abs(dist - values[i]) < .0001){
-				isInRange = true;
-				break;
-			}
-		}
-	if (isInRange) break;
-	}
-	return dist;
-}
-
-void flashScreen(){
-	static lv_style_t white_style;
-	lv_style_copy(&white_style, &lv_style_plain);
-	white_style.body.main_color = LV_COLOR_WHITE;
-	white_style.body.grad_color = LV_COLOR_WHITE;
-	
-	static lv_style_t black_style;
-	lv_style_copy(&black_style, &lv_style_plain);
-	black_style.body.main_color = LV_COLOR_BLACK;
-	black_style.body.grad_color = LV_COLOR_BLACK;
-
-	lv_obj_set_style(lv_scr_act(), &white_style);
-	pros::delay(1000);
-	lv_obj_set_style(lv_scr_act(), &black_style);
-}
-
 /////////////////PROTOTYPE METHODS//////////////////////
-double updateLSDTime() {
-    if (lsd.get() < 5280 && count < 3) {
-        // If the LSD just detected a value less than 5280, update the timeSinceLSD variable
+double updateMSDTime() {
+    if (msd.get() < 5280 && count < 3) {
+        // If the LSD just detected a value less than 5280, update the timeSinceMSD variable
         count++;
-		timeSinceLSD += 20;
-    } else if (lsd.get() < 5280 && count >=3){
-		timeSinceLSD = 0;
+		timeSinceMSD += 20;
+    } else if (msd.get() < 5280 && count >=3){
+		timeSinceMSD = 0;
 		count = 0;
 	}
 	else{
-		timeSinceLSD += 20;
+		timeSinceMSD += 20;
 	}
-	return timeSinceLSD;
+	return timeSinceMSD;
 }
 
-void logData(){
+void logData(double leftJoy){
 // CURRENT CODE - UNTESTED
 	// create vector of motor values
-	std::vector<double> motor_speeds(8);
-	motor_speeds[0] = mBRO.get_actual_velocity();
-	motor_speeds[1] = mBRI.get_actual_velocity();
-	motor_speeds[2] = mFRO.get_actual_velocity();
-	motor_speeds[3] = mFRI.get_actual_velocity();
-	motor_speeds[4] = mBLO.get_actual_velocity();
-	motor_speeds[5] = mBLI.get_actual_velocity();
-	motor_speeds[6] = mFLO.get_actual_velocity();
-	motor_speeds[7] = mFLI.get_actual_velocity();
-
 	std::vector<double> motor_positions(8);
 	motor_positions[0] = mBRO.get_position();
 	motor_positions[1] = mBRI.get_position();
@@ -318,14 +270,13 @@ void logData(){
 	motor_positions[6] = mFLO.get_position();
 	motor_positions[7] = mFLI.get_position();
 
-	double LSD_TIME = updateLSDTime();
+	double MSD_TIME = updateMSDTime();
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(filtered_average(motor_speeds)) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(LSD_TIME) << std::endl;
+	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
 	dataFile.close();
 }
-
 
 void giveInstruction(){
 	auto model = Model::load("/usd/auton_blocker.model");
@@ -346,8 +297,8 @@ void giveInstruction(){
 		float Lsd = lsd.get();
 		float Msd = msd.get();
 		float Bsd = bsd.get();
-		double time_since_lsd = updateLSDTime();
-		time_since_lsd = float(time_since_lsd);
+		double time_since_msd = updateMSDTime();
+		time_since_msd = float(time_since_msd);
 		// load model and create input tensor
 		model = Model::load("/usd/auton_blocker.model");
 		Tensor in{1, 5};
@@ -355,7 +306,7 @@ void giveInstruction(){
 		in.data_[1] = Lsd;
 		in.data_[2] = Msd;
 		in.data_[3] = Bsd;
-		in.data_[4] = time_since_lsd;
+		in.data_[4] = time_since_msd;
 
 		// Run prediction
 		Tensor out = model(in);

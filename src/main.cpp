@@ -156,7 +156,7 @@ void opcontrol() {
 		int intOverflow = 2147483647; //value returned when unable to communicate
 
 		// left side adjustments
-		if (mBROState && mBRO.get_voltage() >= intOverflow){
+		if (mBRO.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
 		if (mBRI.get_voltage() >= intOverflow){
