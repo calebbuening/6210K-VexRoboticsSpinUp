@@ -280,8 +280,8 @@ void autonomous(){
 		driveViaIMU(.25, 0);
 		turnViaIMU(-4);
 		catapultRelease.set_value(true);
-		driveViaTime(500, -300);
-		driveViaIMU(.5);
+		pros::delay(500);
+		driveViaIMU(.25);
 		turnViaIMU(45);
 		mBRO.tare_position();
 		mBRI.tare_position();

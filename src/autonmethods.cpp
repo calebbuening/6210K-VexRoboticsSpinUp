@@ -127,7 +127,7 @@ void turnViaIMU(double heading){
 	while(std::fabs(error) > .25)
 	{
 		if(std::fabs(error) < 30){
-			rotation = -(4.5 * error); // Was 9
+			rotation = -(4.5 * error); // Was 6
 		}else{
 			rotation = -100 * sgn(error); // was 200
 		}
