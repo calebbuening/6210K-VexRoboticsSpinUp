@@ -277,7 +277,11 @@ void autonomous(){
 		pros::delay(2000);
 	}
 	if(auton == 'T'){
-		driveViaIMU(.5, 0);
+		driveViaIMU(.25, 0);
+		turnViaIMU(-4);
+		catapultRelease.set_value(true);
+		driveViaTime(500, -300);
+		driveViaIMU(.5);
 		turnViaIMU(45);
 		mBRO.tare_position();
 		mBRI.tare_position();
