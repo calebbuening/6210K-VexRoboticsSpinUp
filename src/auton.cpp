@@ -291,6 +291,7 @@ void autonomous(){
 			double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
 			double speedMultiplier = 1;
 			if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
+			leftJoy *= speedMultiplier;
 			// Front Left
 			mBRO = (leftJoy) * 127;
 			mBRI = (leftJoy) * 127;
