@@ -316,6 +316,11 @@ void autonomous(){
 	}
 
 	if(auton == 'E'){
+		driveViaIMU(.25, 0);
+		turnViaIMU(-4); // -2
+		catapultRelease.set_value(true);
+		pros::delay(500);
+		driveViaTime(500, -300);
 		driveViaIMU(.5, 0);
 		turnViaIMU(45);
 		mBRO.tare_position();
@@ -329,7 +334,6 @@ void autonomous(){
 		while(true){
 			giveInstruction();
 			pros::delay(20);
-
 		}
 	}
 }

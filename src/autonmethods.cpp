@@ -124,12 +124,12 @@ double filtered_average(std::vector<double> values) {
 void turnViaIMU(double heading){
 	double error = heading - imu.get_rotation();
 	int rotation;
-	while(std::fabs(error) > .1)
+	while(std::fabs(error) > .25)
 	{
 		if(std::fabs(error) < 30){
-			rotation = -(6 * error); // Was 6
+			rotation = -(4.5 * error); // Was 9
 		}else{
-			rotation = -200 * sgn(error); // was 200
+			rotation = -100 * sgn(error); // was 200
 		}
 
 		mBRO.move_velocity(rotation);
@@ -174,7 +174,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			double error = heading - imu.get_rotation();
 			int rotation;
 			if(std::fabs(error) < 15){ // Was 30
-				rotation = (6 * error); // Was 6
+				rotation = (6 * error); // Was 12
 			}else{
 				rotation = vel * sgn(error); // was 200
 			}
@@ -259,7 +259,6 @@ double updateMSDTime() {
 
 void logData(double leftJoy){
 // CURRENT CODE - UNTESTED
-	// create vector of motor values
 	std::vector<double> motor_positions(8);
 	motor_positions[0] = mBRO.get_position();
 	motor_positions[1] = mBRI.get_position();
@@ -274,7 +273,7 @@ void logData(double leftJoy){
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
+	dataFile << float(127 * leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(LSD_TIME) << std::endl;
 	dataFile.close();
 }
 
@@ -311,6 +310,15 @@ void giveInstruction(){
 		// Run prediction
 		Tensor out = model(in);
 		double speed = out.data_[0];
+		if(speed < 2 && speed > -2){
+			speed = 0;
+		}
+		if(speed > 2){
+			speed = 127;
+		}
+		if(speed < -2){
+			speed = -127;
+		}
 		mBRO = speed;
 		mBRI = speed;
 		mFRO = speed;
@@ -321,8 +329,6 @@ void giveInstruction(){
 		mFLI = speed;
 	
 		std::cout << speed << std::endl;
-		master.clear();
-		master.print(0,0, "Speed: %d", speed);
 	} else{
 		count ++;
 	}
