@@ -27,6 +27,7 @@
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
+#define BLOCKER 'D'
 
 #define STD 10 // The standard task delay
 
@@ -52,6 +53,7 @@ pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
 pros::ADIDigitalOut shieldRelease(SHIELD);
 pros::ADIDigitalOut highRelease(HIGH);
+pros::ADIDigitalOut blockerRelease(BLOCKER);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);

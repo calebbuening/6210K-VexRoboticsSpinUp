@@ -24,6 +24,7 @@ extern pros::ADIDigitalOut stringRelease;
 extern pros::ADIDigitalOut catapultRelease;
 extern pros::ADIDigitalOut shieldRelease;
 extern pros::ADIDigitalOut highRelease;
+extern pros::ADIDigitalOut blockerRelease;
 
 // Controllers
 extern pros::Controller master;

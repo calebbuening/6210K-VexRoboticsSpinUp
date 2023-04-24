@@ -273,7 +273,7 @@ void logData(double leftJoy){
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(127 * leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(LSD_TIME) << std::endl;
+	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
 	dataFile.close();
 }
 
@@ -319,14 +319,24 @@ void giveInstruction(){
 		if(speed < -2){
 			speed = -127;
 		}
-		mBRO = speed;
-		mBRI = speed;
-		mFRO = speed;
-		mFRI = speed;
-		mBLO = speed;
-		mBLI = speed;
-		mFLO = speed;
-		mFLI = speed;
+
+		double heading;
+		double error = heading - imu.get_rotation();
+		double leftJoy = speed;
+		int rotation;
+		if(std::fabs(error) < 15){ // Was 30
+			rotation = (6 * error); // Was 12
+		}else{
+			rotation = leftJoy * sgn(error); // was 200
+		}
+		mBRO.move_velocity(leftJoy - rotation);
+		mBRI.move_velocity(leftJoy - rotation);
+		mFRO.move_velocity(leftJoy - rotation);
+		mFRI.move_velocity(leftJoy - rotation);
+		mBLO.move_velocity(leftJoy + rotation);
+		mBLI.move_velocity(leftJoy + rotation);
+		mFLO.move_velocity(leftJoy + rotation);
+		mFLI.move_velocity(leftJoy + rotation);
 	
 		std::cout << speed << std::endl;
 	} else{

@@ -281,7 +281,7 @@ void autonomous(){
 		turnViaIMU(-4);
 		catapultRelease.set_value(true);
 		pros::delay(500);
-		driveViaIMU(.25);
+		driveViaIMU(.25, 0);
 		turnViaIMU(45);
 		mBRO.tare_position();
 		mBRI.tare_position();
@@ -295,21 +295,23 @@ void autonomous(){
 			double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
 			double speedMultiplier = 1;
 			if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
-			leftJoy *= speedMultiplier;
-			// Front Left
-			mBRO = (leftJoy) * 127;
-			mBRI = (leftJoy) * 127;
+			double heading;
+			double error = heading - imu.get_rotation();
+			int rotation;
+			if(std::fabs(error) < 15){ // Was 30
+				rotation = (6 * error); // Was 12
+			}else{
+				rotation = leftJoy * sgn(error); // was 200
+			}
+			mBRO.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mBRI.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mFRO.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mFRI.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mBLO.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mBLI.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mFLO.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mFLI.move_velocity((leftJoy + rotation) * speedMultiplier);
 
-			// Rear Left
-			mFRO = (leftJoy) * 127;
-			mFRI = (leftJoy) * 127;
-			// Front Right
-			mBLO = (leftJoy) * 127;
-			mBLI = (leftJoy) * 127;
-
-			// Rear Right
-			mFLO = (leftJoy) * 127;
-			mFLI = (leftJoy) * 127;
 			logData(leftJoy);
 			pros::delay(10);
 		}
@@ -320,8 +322,8 @@ void autonomous(){
 		turnViaIMU(-4); // -2
 		catapultRelease.set_value(true);
 		pros::delay(500);
-		driveViaTime(500, -300);
-		driveViaIMU(.5, 0);
+		blockerRelease.set_value(true);
+		driveViaIMU(.15, 0);
 		turnViaIMU(45);
 		mBRO.tare_position();
 		mBRI.tare_position();

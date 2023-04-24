@@ -22,6 +22,8 @@ double average(std::vector<pros::Motor> &v){
 
 void opcontrol() {
 
+	// Keep blocker down
+	blockerRelease.set_value(true);
 
 	lv_obj_t * label1 =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(label1, "Every time a bell rings, a robot gets its wings...");
