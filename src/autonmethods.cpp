@@ -259,6 +259,19 @@ double updateMSDTime() {
 
 void logData(double leftJoy){
 // CURRENT CODE - UNTESTED
+	int class_
+	if(leftJoy == 127){
+		class_ = 4;
+	} else if(leftJoy == 63.5){
+		class_ = 3;
+	} else if(leftJoy == 0){
+		class_ = 2;
+	} else if(leftJoy == -63.5){
+		class_ = 1;
+	} else{
+		class_ = 0;
+	}
+
 	std::vector<double> motor_positions(8);
 	motor_positions[0] = mBRO.get_position();
 	motor_positions[1] = mBRI.get_position();
@@ -273,7 +286,7 @@ void logData(double leftJoy){
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
+	dataFile << class_ << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
 	dataFile.close();
 }
 
@@ -310,14 +323,20 @@ void giveInstruction(){
 		// Run prediction
 		Tensor out = model(in);
 		double speed = out.data_[0];
-		if(speed < 2 && speed > -2){
+		if(speed == 0){
+			speed = -127;
+		}
+		else if(speed == 1){
+			speed = -63.5;
+		}
+		else if(speed == 2){
 			speed = 0;
 		}
-		if(speed > 2){
-			speed = 127;
+		else if(speed == 3){
+			speed = 63.5;
 		}
-		if(speed < -2){
-			speed = -127;
+		else{
+			speed = 127;
 		}
 
 		double heading;
