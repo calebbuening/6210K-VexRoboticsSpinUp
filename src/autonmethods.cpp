@@ -259,19 +259,6 @@ double updateMSDTime() {
 
 void logData(double leftJoy){
 // CURRENT CODE - UNTESTED
-	int class_
-	if(leftJoy == 127){
-		class_ = 4;
-	} else if(leftJoy == 63.5){
-		class_ = 3;
-	} else if(leftJoy == 0){
-		class_ = 2;
-	} else if(leftJoy == -63.5){
-		class_ = 1;
-	} else{
-		class_ = 0;
-	}
-
 	std::vector<double> motor_positions(8);
 	motor_positions[0] = mBRO.get_position();
 	motor_positions[1] = mBRI.get_position();
@@ -286,7 +273,7 @@ void logData(double leftJoy){
 	//saves all data to sd card
 	std::ofstream dataFile;
 	dataFile.open("/usd/data.csv", std::ios_base::app);
-	dataFile << class_ << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
+	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
 	dataFile.close();
 }
 
@@ -294,6 +281,7 @@ void giveInstruction(){
 	auto model = Model::load("/usd/auton_blocker.model");
 	if (count > 2){
 		count = 0;
+		int prevSpeed;
 		// convert everything to floats so the tensor doesn't cry
 		std::vector<double> motor_positions(8);
 		motor_positions[0] = mBRO.get_position();
@@ -323,24 +311,57 @@ void giveInstruction(){
 		// Run prediction
 		Tensor out = model(in);
 		double speed = out.data_[0];
-		if(speed == 0){
-			speed = -127;
+		if(speed >= 5 && prevSpeed >= 108.5){
+			speed = 127;
+			prevSpeed = 127;
 		}
-		else if(speed == 1){
-			speed = -63.5;
+		else if(speed >= 5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 108.5;
+			prevSpeed = 108.5;
 		}
-		else if(speed == 2){
+		else if(speed >= 5 && prevSpeed < 0 && prevSpeed >= -108.5){
 			speed = 0;
+			prevSpeed = 0;
 		}
-		else if(speed == 3){
-			speed = 63.5;
+		else if(speed >= 5 && prevSpeed < -108.5){
+			speed = -108.5;
+			prevSpeed = -108.5;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed >= 108.5){
+			speed = 108.5;
+			prevSpeed = 108.5;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed >= -108.5 && prevSpeed < 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed < -108.5){
+			speed = -108.5;
+			prevSpeed = -108.5;
+		}
+		else if(speed <= -5 && prevSpeed >= 108.5){
+			speed = 108.5;
+			prevSpeed = 108.5;
+		}
+		else if(speed <= -5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed <= -5 && prevSpeed >= -108.5 && prevSpeed < 0){
+			speed = -108.5;
+			prevSpeed = -108.5;
 		}
 		else{
-			speed = 127;
+			speed = -127;
+			prevSpeed = -127;
 		}
 
-		double heading;
-		double error = heading - imu.get_rotation();
+
+		double error = 45 - imu.get_rotation();
 		double leftJoy = speed;
 		int rotation;
 		if(std::fabs(error) < 15){ // Was 30
