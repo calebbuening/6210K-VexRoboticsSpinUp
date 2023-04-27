@@ -165,9 +165,26 @@ void turnViaIMU(double heading){
 
 void driveViaIMU(double dist, double heading, double vel = 200){
 	vel = std::fabs(vel); // Make sure velocity is a magnitude, since direction is automatically determined
+	mBRO.get_position();
 	mBRI.tare_position();
+	mFRO.get_position();
+	mFRI.tare_position();
+	mBLO.get_position();
 	mBLI.tare_position();
-	double pos = (mBRI.get_position() + mBLI.get_position())/2;
+	mFLO.get_position();
+	mFLI.tare_position();
+
+	std::vector<double> motor_positions(8);
+	motor_positions[0] = mBRO.get_position();
+	motor_positions[1] = mBRI.get_position();
+	motor_positions[2] = mFRO.get_position();
+	motor_positions[3] = mFRI.get_position();
+	motor_positions[4] = mBLO.get_position();
+	motor_positions[5] = mBLI.get_position();
+	motor_positions[6] = mFLO.get_position();
+	motor_positions[7] = mFLI.get_position();
+	
+	double pos = filtered_average(motor_positions);
 	dist += pos;
 	if(dist > pos){
 		while(pos < dist){
@@ -186,7 +203,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(vel + rotation);
 			mFLO.move_velocity(vel + rotation);
 			mFLI.move_velocity(vel + rotation);
-			pos = (mBRI.get_position() + mBLI.get_position())/2;
+			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}
 	}else{
@@ -206,7 +223,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(-vel + rotation);
 			mFLO.move_velocity(-vel + rotation);
 			mFLI.move_velocity(-vel + rotation);
-			pos = (mBRI.get_position() + mBLI.get_position())/2;
+			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}
 	}
@@ -365,7 +382,7 @@ void giveInstruction(){
 		double leftJoy = speed;
 		int rotation;
 		if(std::fabs(error) < 15){ // Was 30
-			rotation = (6 * error); // Was 12
+			rotation = (3 * error); // Was 12
 		}else{
 			rotation = leftJoy * sgn(error); // was 200
 		}

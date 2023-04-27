@@ -233,12 +233,12 @@ def half_back():
             accepted_points.append(b)
     for x in accepted_points:
         if x in lsd_points:
-            LSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            LSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
         if x in msd_points:
-            MSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            MSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
             count = 0
         if x in bsd_points:
-            BSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            BSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
     if log: 
         values_list[0] = 1
         values_list[1] = pixels * 0.030557749073644
@@ -282,12 +282,12 @@ def stay():
             accepted_points.append(b)
     for x in accepted_points:
         if x in lsd_points:
-            LSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            LSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
         if x in msd_points:
-            MSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            MSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
             count = 0
         if x in bsd_points:
-            BSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-200, 200)
+            BSD = round(16.255999479808015 * k.distance(opponent)) + random.randint(-100, 100)
     if log: 
         values_list[0] = 2
         values_list[1] = pixels * 0.030557749073644
