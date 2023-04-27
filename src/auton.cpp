@@ -114,147 +114,7 @@ void autonomous(){
 	}	
 
 	if(auton == 'A'){
-
-		// Wheels also hold
-		mBRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mBRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mFRO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mFRI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mBLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mBLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mFLO.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
-
-		// Flash the screen to indicate the start of the program
-		pros::Task taskFlashScreen(flashScreen, "Flash Screen");
-
-		// Record the currect distance from the wall, to use when realigning
-		double distTarget = lsd.get();
-		while (distTarget < 1 || distTarget >= 5200){//filter to reasonable values
-			distTarget = lsd.get();
-			pros::delay(5);
-		}
-
-
-		// Manually take a third shot to avoid the latter part of the previously written loop
-		// NOTE: The following values should mirror the scoring loop
-		pros::delay(800);
-		driveViaIMU(.75, 0); //.5
-		turnViaIMU(90);
-		driveViaIMU(2.1, 90); // 1.9
-		pros::delay(200); //uncomment if it isn't working, this is delay for shot
-		catapultRelease.set_value(true);
-		catapultState = true;
-
-		// Turn and drive to face roller, the score
-		driveViaIMU(-7.7, 90); // -7.5
-		turnViaIMU(180);
-		eliScoreRoller();
-
-		// drive and score roller 2
-		driveViaIMU(-2.5, 180, 200); //was2.5
-		turnViaIMU(270);
-		driveViaIMU(1.2, 270, 300); //1.0
-		eliScoreRoller();
-
-		// drive across field to other loader
-		driveViaIMU(-.5, 270, 200);
-		turnViaIMU(220); // was 225, same below
-		driveViaIMU(-17, 220, 600); //12
-		driveViaIMU(1, 220, 500);
-		turnViaIMU(180);
-		driveViaIMU(-1, 180, 300); // Added this to keep it straight over the discs
-		driveViaTime(1000, -500); //1000was200 Bang up against the wall to realign ourself
-
-		// Use the distance sensor to align with the loading area
-		double dist = lsd.get();
-		while (0 > dist || dist >= 5200) {
-			dist = lsd.get();
-			pros::delay(10);
-		}
-		if (dist < (distTarget - 40)){
-			while (dist < (distTarget - 40)){
-				mBRO.move_velocity(200);
-				mBRI.move_velocity(200);
-				mFRO.move_velocity(-200);
-				mFRI.move_velocity(-200);
-				mBLO.move_velocity(-200); //adjust for motor
-				mBLI.move_velocity(-200);
-				mFLO.move_velocity(200);
-				mFLI.move_velocity(200);
-
-				dist = lsd.get();
-				pros::delay(10);
-			}
-		}
-		if (dist > (distTarget + 40)){
-			while (dist > (distTarget + 40)){ //strafe right
-			 	mBRO.move_velocity(-200);
-				mBRI.move_velocity(-200);
-				mFRO.move_velocity(200);
-				mFRI.move_velocity(200);
-				mBLO.move_velocity(200);
-				mBLI.move_velocity(200);
-				mFLO.move_velocity(-200);
-				mFLI.move_velocity(-200);
-				dist = lsd.get();
-				pros::delay(10);
-			}
-		}
-
-		// Alert for loading and press up against the wall whilst loading again
-		pros::Task taskFlashScreen2(flashScreen, "Flash Screen");
-		driveViaTime(200, -400);
-
-
-		// Zero the imu to make everything from here on out a lot easier
-		imu.set_rotation(imu.get_rotation()-180);
-
-		// Take a shot
-		// Load the preload again
-		pros::delay(800);
-
-		// Take a second shot
-		// NOTE: This should also mirror the scoring loop
-		driveViaIMU(.75, 0, 200); //.5
-		turnViaIMU(90);
-		driveViaIMU(2.1, 90);
-		pros::delay(200);
-
-		catapultRelease.set_value(true);
-		catapultState = true;
-
-		// Reload the catapult again because idk why
-
-		// TODO: Check and see how much this mirrors the original
-		// Turn and drive to face roller, score
-		driveViaIMU(-7.9, 90, 400); //-7.5
-		turnViaIMU(180);
-		eliScoreRoller();
-
-		// drive and score roller 4
-		driveViaIMU(-2.5, 180, 200); //was2.5
-		turnViaIMU(270);
-		driveViaIMU(1.2, 270, 300); //1.0
-		driveViaTime(1000, 400);
-		eliScoreRoller();
-
-		// Line up for endgame
-		driveViaIMU(-1, 270, 200);
-		turnViaIMU(225);
-
-		// Endgame
-		stringRelease.set_value(true);
-
-		// Wheels also hold
-		mBRO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mBRI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mFRO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mFRI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mBLO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mBLI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mFLO.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-		mFLI.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		// TBD: Make a crappy skills auton
 	}
 
 	if(auton == 'L'){
@@ -417,14 +277,65 @@ void autonomous(){
 		pros::delay(2000);
 	}
 	if(auton == 'T'){
-		while(true){
-			double dist = lsd.get();
-			std::cout << dist << std::endl;
-			pros::delay(1000);
+		driveViaIMU(.25, 0);
+		turnViaIMU(-4);
+		catapultRelease.set_value(true);
+		pros::delay(500);
+		driveViaIMU(.1, 0);
+		turnViaIMU(45);
+		mBRO.tare_position();
+		mBRI.tare_position();
+		mFRO.tare_position();
+		mFRI.tare_position();
+		mBLO.tare_position();
+		mBLI.tare_position();
+		mFLO.tare_position();
+		mFLI.tare_position();
+		while (true){
+			double leftJoy = master.get_analog(ANALOG_LEFT_Y) / 127;
+			double speedMultiplier = 1;
+			if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
+			double heading;
+			double error = heading - imu.get_rotation();
+			int rotation;
+			if(std::fabs(error) < 15){ // Was 30
+				rotation = (6 * error); // Was 12
+			}else{
+				rotation = leftJoy * sgn(error); // was 200
+			}
+			mBRO.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mBRI.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mFRO.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mFRI.move_velocity((leftJoy - rotation) * speedMultiplier);
+			mBLO.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mBLI.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mFLO.move_velocity((leftJoy + rotation) * speedMultiplier);
+			mFLI.move_velocity((leftJoy + rotation) * speedMultiplier);
+
+			logData(leftJoy);
+			pros::delay(10);
 		}
 	}
 
 	if(auton == 'E'){
-		driveViaIMU(2, 0);
+		driveViaIMU(.25, 0);
+		turnViaIMU(-4); // -2
+		catapultRelease.set_value(true);
+		pros::delay(500);
+		blockerRelease.set_value(false);
+		driveViaIMU(.1, 0);
+		turnViaIMU(45);
+		mBRO.tare_position();
+		mBRI.tare_position();
+		mFRO.tare_position();
+		mFRI.tare_position();
+		mBLO.tare_position();
+		mBLI.tare_position();
+		mFLO.tare_position();
+		mFLI.tare_position();
+		while(true){
+			giveInstruction();
+			pros::delay(20);
+		}
 	}
 }

@@ -24,6 +24,7 @@ extern pros::ADIDigitalOut stringRelease;
 extern pros::ADIDigitalOut catapultRelease;
 extern pros::ADIDigitalOut shieldRelease;
 extern pros::ADIDigitalOut highRelease;
+extern pros::ADIDigitalOut blockerRelease;
 
 // Controllers
 extern pros::Controller master;
@@ -41,7 +42,8 @@ extern pros::Motor mFLI;
 
 // Sensors
 extern pros::IMU imu;
-extern pros::GPS gps;
 extern pros::Distance lsd;
+extern pros::Distance msd;
+extern pros::Distance bsd;
 
 #endif // _GLOBALS_H_

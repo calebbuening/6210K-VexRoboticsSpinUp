@@ -11,6 +11,7 @@
 #define BLI 2
 #define FLO 20
 #define FLI 6
+#define MCATA 17
 
 #define STRING 'H'
 #define CATA 'A'
@@ -20,9 +21,13 @@
 
 #define GYRO 13
 #define LSD 5
+#define MSD 19
+#define BSD 18
+#define VISION 14
 #define GPS_PORT 11
 #define GPS_OFFSET_X 0
 #define GPS_OFFSET_Y 0
+#define BLOCKER 'D'
 
 #define STD 10 // The standard task delay
 
@@ -32,6 +37,7 @@ bool stringReleased = false;
 bool clockOverride = false;
 char auton = 'N';
 bool skills = false;
+bool mBROState = true;
 bool initialized = false;
 bool catapultState = false;
 bool shieldReleased = false;
@@ -39,12 +45,15 @@ bool highReleased = false;
 bool stringLauncherAuto = true;
 bool shieldLauncherAuto = true;
 bool highReleaseAuto = true;
+static lv_style_t black_style;
+static lv_style_t white_style;
 
 // Pneumatics
 pros::ADIDigitalOut stringRelease(STRING);
 pros::ADIDigitalOut catapultRelease(CATA);
 pros::ADIDigitalOut shieldRelease(SHIELD);
 pros::ADIDigitalOut highRelease(HIGH);
+pros::ADIDigitalOut blockerRelease(BLOCKER);
 
 // Controllers
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -62,5 +71,6 @@ pros::Motor mFLI(FLI, pros::E_MOTOR_GEARSET_06, false, pros::E_MOTOR_ENCODER_ROT
 
 // Sensors
 pros::IMU imu(GYRO);
-pros::GPS gps(GPS_PORT, GPS_OFFSET_X, GPS_OFFSET_Y);
 pros::Distance lsd(LSD);
+pros::Distance msd(MSD);
+pros::Distance bsd(BSD);

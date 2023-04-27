@@ -22,6 +22,8 @@ double average(std::vector<pros::Motor> &v){
 
 void opcontrol() {
 
+	// Keep blocker down
+	blockerRelease.set_value(true);
 
 	lv_obj_t * label1 =  lv_label_create(lv_scr_act(), NULL);
     lv_label_set_text(label1, "Every time a bell rings, a robot gets its wings...");
@@ -46,6 +48,8 @@ void opcontrol() {
 		while(!master.get_digital_new_press(DIGITAL_A)) pros::delay(60);
 		catapultRelease.set_value(false);
 		pros::delay(60);
+
+		master.clear();
 
 		// Select mode
 		pros::delay(60);
@@ -96,8 +100,8 @@ void opcontrol() {
 				case 3: master.print(1, 0, "   Left Side Auton  "); auton = 'L'; break;
 				case 4: master.print(1, 0, "     League Left    "); auton = 'S'; break;
 				case 5: master.print(1, 0, "     League Right   "); auton = 'Z'; break;
-				case 6: master.print(1, 0, "    Auton Blocker   "); auton = 'T'; break;
-				case 7: master.print(1, 0, "    Experimental    "); auton = 'E'; break;
+				case 6: master.print(1, 0, "       Testing      "); auton = 'T'; break;
+				case 7: master.print(1, 0, "    Auton Blocker   "); auton = 'E'; break;
 				default: master.print(1, 0,"ERROR: Invalid auton"); break;
 			}
 
@@ -112,7 +116,7 @@ void opcontrol() {
 			pros::delay(60);
 		}
 		master.clear();
-
+		
 		initialized = true;
 	}
 
@@ -129,10 +133,6 @@ void opcontrol() {
 
 	while (true) {
 
-		if(master.get_digital_new_press(DIGITAL_DOWN)){
-			autonomous();
-		}
-
 		// Fire catapult
 		if(master.get_digital_new_press(DIGITAL_A)){
 			catapultRelease.set_value(true);
@@ -145,8 +145,9 @@ void opcontrol() {
 		// Deadzone by 10%
 		if(std::fabs(leftJoy) < .05) leftJoy = 0;
 		if(std::fabs(rightJoy) < .05) rightJoy = 0;
-
+		
 		// Assign speeds after scaling them back to 100 //
+
 		double speedMultiplier = 1;
 
 		if(master.get_digital(DIGITAL_L1)) speedMultiplier = .5;
@@ -157,30 +158,30 @@ void opcontrol() {
 		int intOverflow = 2147483647; //value returned when unable to communicate
 
 		// left side adjustments
-		if (mBRO.get_voltage() == intOverflow){
+		if (mBRO.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mBRI.get_voltage() == intOverflow){
+		if (mBRI.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mFRO.get_voltage() == intOverflow){
+		if (mFRO.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
-		if (mFRI.get_voltage() == intOverflow){
+		if (mFRI.get_voltage() >= intOverflow){
 			leftMotorAdjust = leftMotorAdjust * .5;
 		}
 
 		// Right side adjustment
-		if (mBLO.get_voltage() == intOverflow){
+		if (mBLO.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mBLI.get_voltage() == intOverflow){
+		if (mBLI.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mFLO.get_voltage() == intOverflow){
+		if (mFLO.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
-		if (mFLI.get_voltage() == intOverflow){
+		if (mFLI.get_voltage() >= intOverflow){
 			rightMotorAdjust = rightMotorAdjust * .5;
 		}
 
@@ -190,7 +191,7 @@ void opcontrol() {
 
 		// Rear Left
 		mFRO = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
-		mFRI = (leftJoy - rightJoy) * 127 * speedMultiplier * rightMotorAdjust;
+		mFRI = (leftJoy - rightJoy) * 127	* speedMultiplier * rightMotorAdjust;
 
 		// Front Right
 		mBLO = (leftJoy + rightJoy) * 127 * speedMultiplier * leftMotorAdjust;
@@ -390,7 +391,7 @@ void opcontrol() {
 		}
 
 		loopCounter++;
-
+		
 		pros::delay(20);
 	}
 }

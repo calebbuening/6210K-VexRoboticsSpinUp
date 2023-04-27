@@ -1,5 +1,14 @@
 #include "main.h"
+#include "api.h"
 #include "globals.h"
+#include "src/model.h"
+#include <fstream>
+#include <string>
+
+using keras2cpp::Model;
+using keras2cpp::Tensor;
+double timeSinceMSD = 0;
+double count = 0;
 
 void eliScoreRoller(){
 	int loop=0;
@@ -86,15 +95,41 @@ int sgn(double d) // Mimimcs the mathematical sgn function
 	return 0;
 }
 
+double filtered_average(std::vector<double> values) {
+    // Sort the values in ascending order
+    std::sort(values.begin(), values.end());
+
+    // Calculate the median value
+    double median = values[values.size() / 2];
+
+    // Filter out any values that are more than 1.5 times the interquartile range from the median
+    double q1 = values[values.size() / 4];
+    double q3 = values[3 * values.size() / 4];
+    double iqr = q3 - q1;
+    std::vector<double> filtered_values;
+    for (double x : values) {
+        if (x >= median - 1.5 * iqr && x <= median + 1.5 * iqr) {
+            filtered_values.push_back(x);
+        }
+    }
+
+    // Calculate the average of the filtered values
+    double sum = 0;
+	for (double x : filtered_values) {
+		sum += x;
+	}
+	return sum / filtered_values.size();
+}
+
 void turnViaIMU(double heading){
 	double error = heading - imu.get_rotation();
 	int rotation;
-	while(std::fabs(error) > .5)
+	while(std::fabs(error) > .25)
 	{
 		if(std::fabs(error) < 30){
-			rotation = -(9 * error); // Was 6
+			rotation = -(4.5 * error); // Was 6
 		}else{
-			rotation = -200 * sgn(error); // was 200
+			rotation = -100 * sgn(error); // was 200
 		}
 
 		mBRO.move_velocity(rotation);
@@ -108,7 +143,7 @@ void turnViaIMU(double heading){
 		error = heading - imu.get_rotation();
 		pros::delay(5);
 	}
-	rotation = 120 * sgn(error); // was 30
+	rotation = 30 * sgn(error); // was 30
 	mBRO.move_velocity(rotation);
 	mBRI.move_velocity(rotation);
 	mFRO.move_velocity(rotation);
@@ -130,16 +165,33 @@ void turnViaIMU(double heading){
 
 void driveViaIMU(double dist, double heading, double vel = 200){
 	vel = std::fabs(vel); // Make sure velocity is a magnitude, since direction is automatically determined
+	mBRO.get_position();
 	mBRI.tare_position();
+	mFRO.get_position();
+	mFRI.tare_position();
+	mBLO.get_position();
 	mBLI.tare_position();
-	double pos = (mBRI.get_position() + mBLI.get_position())/2;
+	mFLO.get_position();
+	mFLI.tare_position();
+
+	std::vector<double> motor_positions(8);
+	motor_positions[0] = mBRO.get_position();
+	motor_positions[1] = mBRI.get_position();
+	motor_positions[2] = mFRO.get_position();
+	motor_positions[3] = mFRI.get_position();
+	motor_positions[4] = mBLO.get_position();
+	motor_positions[5] = mBLI.get_position();
+	motor_positions[6] = mFLO.get_position();
+	motor_positions[7] = mFLI.get_position();
+	
+	double pos = filtered_average(motor_positions);
 	dist += pos;
 	if(dist > pos){
 		while(pos < dist){
 			double error = heading - imu.get_rotation();
 			int rotation;
 			if(std::fabs(error) < 15){ // Was 30
-				rotation = (12 * error); // Was 6
+				rotation = (6 * error); // Was 12
 			}else{
 				rotation = vel * sgn(error); // was 200
 			}
@@ -151,7 +203,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(vel + rotation);
 			mFLO.move_velocity(vel + rotation);
 			mFLI.move_velocity(vel + rotation);
-			pos = (mBRI.get_position() + mBLI.get_position())/2;
+			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}
 	}else{
@@ -159,7 +211,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			double error = heading - imu.get_rotation();
 			int rotation;
 			if(std::fabs(error) < 15){
-				rotation = (12 * error); // Was 6
+				rotation = (6 * error); // Was 6
 			}else{
 				rotation = vel * sgn(error); // was 200
 			}
@@ -171,7 +223,7 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(-vel + rotation);
 			mFLO.move_velocity(-vel + rotation);
 			mFLI.move_velocity(-vel + rotation);
-			pos = (mBRI.get_position() + mBLI.get_position())/2;
+			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}
 	}
@@ -206,39 +258,146 @@ void driveViaTime(double time, double vel){
 	mFLI.move_velocity(0);
 }
 
-double getLSD(double rangeStart, double rangeStop){
-	double dist;
-	std::vector<double> values;
-
-	for (double i = rangeStart; i <= rangeStop; i ++){
-		values.push_back(i);
+/////////////////PROTOTYPE METHODS//////////////////////
+double updateMSDTime() {
+    if (msd.get() < 5280 && count < 3) {
+        // If the LSD just detected a value less than 5280, update the timeSinceMSD variable
+        count++;
+		timeSinceMSD += 20;
+    } else if (msd.get() < 5280 && count >=3){
+		timeSinceMSD = 0;
+		count = 0;
 	}
-	bool isInRange = false;
-	while (!isInRange){
-		dist = lsd.get();
-		for (int i = 0; i < values.size() + 1; i++){
-			if (std::abs(dist - values[i]) < .0001){
-				isInRange = true;
-				break;
-			}
-		}
-	if (isInRange) break;
+	else{
+		timeSinceMSD += 20;
 	}
-	return dist;
+	return timeSinceMSD;
 }
 
-void flashScreen(){
-	static lv_style_t white_style;
-	lv_style_copy(&white_style, &lv_style_plain);
-	white_style.body.main_color = LV_COLOR_WHITE;
-	white_style.body.grad_color = LV_COLOR_WHITE;
-	
-	static lv_style_t black_style;
-	lv_style_copy(&black_style, &lv_style_plain);
-	black_style.body.main_color = LV_COLOR_BLACK;
-	black_style.body.grad_color = LV_COLOR_BLACK;
+void logData(double leftJoy){
+// CURRENT CODE - UNTESTED
+	std::vector<double> motor_positions(8);
+	motor_positions[0] = mBRO.get_position();
+	motor_positions[1] = mBRI.get_position();
+	motor_positions[2] = mFRO.get_position();
+	motor_positions[3] = mFRI.get_position();
+	motor_positions[4] = mBLO.get_position();
+	motor_positions[5] = mBLI.get_position();
+	motor_positions[6] = mFLO.get_position();
+	motor_positions[7] = mFLI.get_position();
 
-	lv_obj_set_style(lv_scr_act(), &white_style);
-	pros::delay(1000);
-	lv_obj_set_style(lv_scr_act(), &black_style);
+	double MSD_TIME = updateMSDTime();
+	//saves all data to sd card
+	std::ofstream dataFile;
+	dataFile.open("/usd/data.csv", std::ios_base::app);
+	dataFile << float(leftJoy) << ", " << float(filtered_average(motor_positions)) << ", " << float(lsd.get()) << ", " << float(msd.get()) << ", " << float(bsd.get()) << ", " << float(MSD_TIME) << std::endl;
+	dataFile.close();
+}
+
+void giveInstruction(){
+	auto model = Model::load("/usd/auton_blocker.model");
+	if (count > 2){
+		count = 0;
+		int prevSpeed;
+		// convert everything to floats so the tensor doesn't cry
+		std::vector<double> motor_positions(8);
+		motor_positions[0] = mBRO.get_position();
+		motor_positions[1] = mBRI.get_position();
+		motor_positions[2] = mFRO.get_position();
+		motor_positions[3] = mFRI.get_position();
+		motor_positions[4] = mBLO.get_position();
+		motor_positions[5] = mBLI.get_position();
+		motor_positions[6] = mFLO.get_position();
+		motor_positions[7] = mFLI.get_position();
+
+		float pos = filtered_average(motor_positions);
+		float Lsd = lsd.get();
+		float Msd = msd.get();
+		float Bsd = bsd.get();
+		double time_since_msd = updateMSDTime();
+		time_since_msd = float(time_since_msd);
+		// load model and create input tensor
+		model = Model::load("/usd/auton_blocker.model");
+		Tensor in{1, 5};
+		in.data_[0] = pos;
+		in.data_[1] = Lsd;
+		in.data_[2] = Msd;
+		in.data_[3] = Bsd;
+		in.data_[4] = time_since_msd;
+
+		// Run prediction
+		Tensor out = model(in);
+		double speed = out.data_[0];
+		if(speed >= 5 && prevSpeed >= 108.5){
+			speed = 127;
+			prevSpeed = 127;
+		}
+		else if(speed >= 5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 108.5;
+			prevSpeed = 108.5;
+		}
+		else if(speed >= 5 && prevSpeed < 0 && prevSpeed >= -108.5){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed >= 5 && prevSpeed < -108.5){
+			speed = -108.5;
+			prevSpeed = -108.5;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed >= 108.5){
+			speed = 108.5;
+			prevSpeed = 108.5;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed >= -108.5 && prevSpeed < 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed >= -5 && speed <= 5 && prevSpeed < -108.5){
+			speed = -108.5;
+			prevSpeed = -108.5;
+		}
+		else if(speed <= -5 && prevSpeed >= 108.5){
+			speed = 108.5;
+			prevSpeed = 108.5;
+		}
+		else if(speed <= -5 && prevSpeed < 108.5 && prevSpeed >= 0){
+			speed = 0;
+			prevSpeed = 0;
+		}
+		else if(speed <= -5 && prevSpeed >= -108.5 && prevSpeed < 0){
+			speed = -108.5;
+			prevSpeed = -108.5;
+		}
+		else{
+			speed = -127;
+			prevSpeed = -127;
+		}
+
+
+		double error = 45 - imu.get_rotation();
+		double leftJoy = speed;
+		int rotation;
+		if(std::fabs(error) < 15){ // Was 30
+			rotation = (3 * error); // Was 12
+		}else{
+			rotation = leftJoy * sgn(error); // was 200
+		}
+		mBRO.move_velocity(leftJoy - rotation);
+		mBRI.move_velocity(leftJoy - rotation);
+		mFRO.move_velocity(leftJoy - rotation);
+		mFRI.move_velocity(leftJoy - rotation);
+		mBLO.move_velocity(leftJoy + rotation);
+		mBLI.move_velocity(leftJoy + rotation);
+		mFLO.move_velocity(leftJoy + rotation);
+		mFLI.move_velocity(leftJoy + rotation);
+	
+		std::cout << speed << std::endl;
+	} else{
+		count ++;
+	}
+	
 }
