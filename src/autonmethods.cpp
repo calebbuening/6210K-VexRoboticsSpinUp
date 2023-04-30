@@ -165,13 +165,13 @@ void turnViaIMU(double heading){
 
 void driveViaIMU(double dist, double heading, double vel = 200){
 	vel = std::fabs(vel); // Make sure velocity is a magnitude, since direction is automatically determined
-	mBRO.get_position();
+	mBRO.tare_position();
 	mBRI.tare_position();
-	mFRO.get_position();
+	mFRO.tare_position();
 	mFRI.tare_position();
-	mBLO.get_position();
+	mBLO.tare_position();
 	mBLI.tare_position();
-	mFLO.get_position();
+	mFLO.tare_position();
 	mFLI.tare_position();
 
 	std::vector<double> motor_positions(8);
@@ -203,6 +203,16 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(vel + rotation);
 			mFLO.move_velocity(vel + rotation);
 			mFLI.move_velocity(vel + rotation);
+
+			motor_positions[0] = mBRO.get_position();
+			motor_positions[1] = mBRI.get_position();
+			motor_positions[2] = mFRO.get_position();
+			motor_positions[3] = mFRI.get_position();
+			motor_positions[4] = mBLO.get_position();
+			motor_positions[5] = mBLI.get_position();
+			motor_positions[6] = mFLO.get_position();
+			motor_positions[7] = mFLI.get_position();
+
 			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}
@@ -223,6 +233,16 @@ void driveViaIMU(double dist, double heading, double vel = 200){
 			mBLI.move_velocity(-vel + rotation);
 			mFLO.move_velocity(-vel + rotation);
 			mFLI.move_velocity(-vel + rotation);
+			
+			motor_positions[0] = mBRO.get_position();
+			motor_positions[1] = mBRI.get_position();
+			motor_positions[2] = mFRO.get_position();
+			motor_positions[3] = mFRI.get_position();
+			motor_positions[4] = mBLO.get_position();
+			motor_positions[5] = mBLI.get_position();
+			motor_positions[6] = mFLO.get_position();
+			motor_positions[7] = mFLI.get_position();
+			
 			pos = filtered_average(motor_positions);
 			pros::delay(5);
 		}

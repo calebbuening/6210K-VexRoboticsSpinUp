@@ -323,7 +323,6 @@ void autonomous(){
 		catapultRelease.set_value(true);
 		pros::delay(500);
 		blockerRelease.set_value(false);
-		driveViaIMU(.1, 0);
 		turnViaIMU(45);
 		mBRO.tare_position();
 		mBRI.tare_position();
