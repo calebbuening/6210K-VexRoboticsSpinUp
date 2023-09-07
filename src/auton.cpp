@@ -283,6 +283,8 @@ void autonomous(){
 		pros::delay(500);
 		driveViaIMU(.1, 0);
 		turnViaIMU(45);
+
+
 		mBRO.tare_position();
 		mBRI.tare_position();
 		mFRO.tare_position();

@@ -10,6 +10,14 @@ using keras2cpp::Tensor;
 double timeSinceMSD = 0;
 double count = 0;
 
+/* An apology to the reader:
+ * 
+ * The following is an extremely nasty method written by our main engineer during a point of
+ * desperation with no programmers around. The method, though ugly, worked so well that we
+ * never really needed to replace it. So brace yourselves.
+ * 
+ * Also, it's copied and pasted throughout the software :/
+ */
 void eliScoreRoller(){
 	int loop=0;
 		while(loop<1){
@@ -95,6 +103,7 @@ int sgn(double d) // Mimimcs the mathematical sgn function
 	return 0;
 }
 
+// A method that finds the average after removing outliers
 double filtered_average(std::vector<double> values) {
     // Sort the values in ascending order
     std::sort(values.begin(), values.end());
@@ -121,9 +130,12 @@ double filtered_average(std::vector<double> values) {
 	return sum / filtered_values.size();
 }
 
+// For turning via the IMU sensor
 void turnViaIMU(double heading){
 	double error = heading - imu.get_rotation();
 	int rotation;
+
+	// Turn to an accuracy within .5 degrees
 	while(std::fabs(error) > .25)
 	{
 		if(std::fabs(error) < 30){
@@ -131,7 +143,6 @@ void turnViaIMU(double heading){
 		}else{
 			rotation = -100 * sgn(error); // was 200
 		}
-
 		mBRO.move_velocity(rotation);
 		mBRI.move_velocity(rotation);
 		mFRO.move_velocity(rotation);
@@ -143,6 +154,9 @@ void turnViaIMU(double heading){
 		error = heading - imu.get_rotation();
 		pros::delay(5);
 	}
+
+	// Do a quick push in the opposite direction to minimize the drift past the target
+	// due to momentum
 	rotation = 30 * sgn(error); // was 30
 	mBRO.move_velocity(rotation);
 	mBRI.move_velocity(rotation);
@@ -153,6 +167,8 @@ void turnViaIMU(double heading){
 	mFLO.move_velocity(-rotation);
 	mFLI.move_velocity(-rotation);
 	pros::delay(50);
+
+	// Stop
 	mBRO.move_velocity(0);
 	mBRI.move_velocity(0);
 	mFRO.move_velocity(0);
@@ -163,6 +179,7 @@ void turnViaIMU(double heading){
 	mFLI.move_velocity(0);
 }
 
+// Drive in a straight line using the IMU sensor
 void driveViaIMU(double dist, double heading, double vel = 200){
 	vel = std::fabs(vel); // Make sure velocity is a magnitude, since direction is automatically determined
 	mBRO.tare_position();
