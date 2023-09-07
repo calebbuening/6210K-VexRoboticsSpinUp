@@ -1,14 +1,14 @@
 # Source Code
-This file contains all of the source code, including the Neural Network (COPilot)
+The chaoticly organized container of all our code from this year.
 
 ### nndata folder
 Contains data used to train COPilot
 
 ### python folder
-Contains COPilot python code for training the models. Also includes keras2cpp file
+Contains COPilot python code for training the models. Also includes keras2cpp file.
 
 ### src folder
-Contains keras2cpp includes
+Contains keras2cpp includes.
 
 ### auton_assist_methods.cpp
 Contains all of the methods used to simplify autonomous programming
@@ -21,4 +21,3 @@ Files loaded onto microSD for the robot to use. These files contain the network 
 
 ### main.cpp
 All code that executes on the robot
-
